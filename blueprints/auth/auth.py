@@ -50,7 +50,7 @@ def register():
             {"username": 1, "email": 1, "_id": 0}
         )
 
-        # Return response based on field already in use.
+        # Return response based on field already in use
         if existing_user:
             if existing_user.get("username") == username:
                 return make_response(jsonify({"error": "Username already in use"}), 409)
@@ -83,7 +83,7 @@ def register():
                 "message": "User registered successfully",
                 "username": username,
                 "api_key": api_key,
-                "Note": "Take a note of your unique API KEY, as this will be required for future requests"
+                "info": "Take a note of your unique API KEY, as this will be required when making future requests"
             }), 201
         )
     
@@ -99,7 +99,6 @@ def login():
     try:
         # Get and validate credentials
         data = request.get_json(silent=True) or {}
-
         username = (data.get("username") or "").strip().lower()
         password = (data.get("password") or "").strip()
         api_key = (request.headers.get("x-api-key") or "").strip()
@@ -157,6 +156,7 @@ def login():
             }), 200
         )
 
+    # General Exception
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
@@ -182,6 +182,7 @@ def logout():
 
         return make_response(jsonify({"message": "Logout successful"}), 200)
 
+    # General Exception
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
@@ -215,73 +216,84 @@ def remove_user(username):
         else:
             return make_response(jsonify({"error": "User deletion failed unexpectedly."}), 500)
 
+    # General Exception
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
 # --- Reactivate User (ADMIN ONLY) ---
 def reactivate_user(username):
-    # Get JSON data from the request body
-    data = request.get_json(silent=True) or {}
-    reason = data.get("reason", "No reason provided")
-
-    # Check user exists
-    user = users.find_one({"username": username})
-    if not user:
-        return make_response(jsonify({"error": "User not found"}), 404)
-
-    # Check if the user is already active
-    if user.get("active", True):
-        return make_response(jsonify({"message": "User already active"}), 200)
-
-    # Reactivate the user and clear deactivation fields
-    users.update_one(
-        {"username": username},
-        {"$set": {"active": True}, "$unset": {"deactivated_at": "", "deactivation_reason": ""}}
-    )
-
-    # Log reactivate action for auditing purposes
-    log_admin_action(
-        request.user["username"],
-        "reactivate_user",
-        username,
-        {"reason": reason}
-    )
-
-    return make_response(jsonify({"message": f"User '{username}' reactivated"}), 200)
+    try:
+        # Get JSON data from the request body
+        data = request.get_json(silent=True) or {}
+        reason = data.get("reason", "No reason provided")
+    
+        # Check user exists
+        user = users.find_one({"username": username})
+        if not user:
+            return make_response(jsonify({"error": "User not found"}), 404)
+    
+        # Check if the user is already active
+        if user.get("active", True):
+            return make_response(jsonify({"message": "User already active"}), 200)
+    
+        # Reactivate the user and clear deactivation fields
+        users.update_one(
+            {"username": username},
+            {"$set": {"active": True}, "$unset": {"deactivated_at": "", "deactivation_reason": ""}}
+        )
+    
+        # Log reactivate action for auditing purposes
+        log_admin_action(
+            request.user["username"],
+            "reactivate_user",
+            username,
+            {"reason": reason}
+        )
+    
+        return make_response(jsonify({"message": f"User '{username}' reactivated"}), 200)
+    
+    # General Exception
+    except Exception as e:
+        return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
 # --- Deactivate User (ADMIN ONLY) ---
 def deactivate_user(username):
-    # Get JSON data from the request body
-    data = request.get_json(silent=True) or {}
-    reason = data.get("reason", "No reason provided")
+    try:
+        # Get JSON data from the request body
+        data = request.get_json(silent=True) or {}
+        reason = data.get("reason", "No reason provided")
+    
+        # Check user exists
+        user = users.find_one({"username": username})
+        if not user:
+            return make_response(jsonify({"error": "User not found"}), 404)
+    
+        # Check if the user is already inactive
+        if not user.get("active", True):
+            return make_response(jsonify({"message": "User already inactive"}), 200)
+    
+        # Deactivate the user and record timestamp and reason for deactivation
+        users.update_one(
+            {"username": username},
+            {"$set": {"active": False, "deactivated_at": datetime.now(timezone.utc).isoformat(), "deactivation_reason": reason}}
+        )
+    
+        # Log deactivate action for auditing purposes
+        log_admin_action(
+            request.user["username"],
+            "deactivate_user",
+            username,
+            {"reason": reason}
+        )  
+    
+        return make_response(jsonify({
+            "message": f"User '{username}' deactivated",
+            "reason": reason
+        }), 200)
 
-    # Check user exists
-    user = users.find_one({"username": username})
-    if not user:
-        return make_response(jsonify({"error": "User not found"}), 404)
-
-    # Check if the user is already inactive
-    if not user.get("active", True):
-        return make_response(jsonify({"message": "User already inactive"}), 200)
-
-    # Deactivate the user and record timestamp and reason for deactivation
-    users.update_one(
-        {"username": username},
-        {"$set": {"active": False, "deactivated_at": datetime.now(timezone.utc).isoformat(), "deactivation_reason": reason}}
-    )
-
-    # Log deactivate action for auditing purposes
-    log_admin_action(
-        request.user["username"],
-        "deactivate_user",
-        username,
-        {"reason": reason}
-    )  
-
-    return make_response(jsonify({
-        "message": f"User '{username}' deactivated",
-        "reason": reason
-    }), 200)
+    # General Exception
+    except Exception as e:
+        return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
 # --- Refresh Token ---
 def refresh_token():
