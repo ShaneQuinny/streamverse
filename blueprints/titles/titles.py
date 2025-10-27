@@ -1,7 +1,8 @@
 # --- Imports ---
 from flask import Blueprint, request, jsonify, make_response
 from bson import ObjectId
-from globals import titles, validate_object_id
+from globals import titles
+from utils.validation import validate_object_id
 
 # --- Define Titles Blueprint ---
 titles_bp = Blueprint("titles_bp", __name__)

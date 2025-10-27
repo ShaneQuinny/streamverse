@@ -3,6 +3,7 @@ from flask import Blueprint, request, make_response, jsonify
 from globals import users, blacklist, SECRET_KEY
 from decorators import jwt_required, admin_required
 from utils.audit import log_admin_action
+from utils.register_routes import register_blueprint_routes
 from datetime import datetime, timedelta, timezone
 from email_validator import validate_email, EmailNotValidError
 import secrets
@@ -14,13 +15,14 @@ auth_bp = Blueprint("auth_bp", __name__)
 
 # --- Route Definitions ---
 auth_routes = [
-    ("/api/v1.0/register", "register", ["POST"], []),
-    ("/api/v1.0/login", "login", ["POST"], []),
-    ("/api/v1.0/logout", "logout", ["POST"], [jwt_required]),
-    ("/api/v1.0/users/<string:username>", "remove_user", ["DELETE"], [jwt_required, admin_required]),
-    ("/api/v1.0/users/<string:username>/reactivate", "reactivate_user", ["PATCH"], [jwt_required, admin_required]),
-    ("/api/v1.0/users/<string:username>/deactivate", "deactivate_user", ["PATCH"], [jwt_required, admin_required]),
-    ("/api/v1.0/token/refresh", "refresh_token", ["POST"], []),
+    ("/register", "register", ["POST"], []),
+    ("/login", "login", ["POST"], []),
+    ("/logout", "logout", ["POST"], [jwt_required]),
+    ("/users", "get_all_users", ["GET"], [jwt_required, admin_required]),
+    ("/users/<string:username>", "remove_user", ["DELETE"], [jwt_required, admin_required]),
+    ("/users/<string:username>/reactivate", "reactivate_user", ["PATCH"], [jwt_required, admin_required]),
+    ("/users/<string:username>/deactivate", "deactivate_user", ["PATCH"], [jwt_required, admin_required]),
+    ("/token/refresh", "refresh_token", ["POST"], []),
 ]
 
 # --- Register User ---
@@ -185,6 +187,52 @@ def logout():
     # General Exception
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
+    
+# --- Get All Registered Users ---
+def get_all_users():
+ # Pagination parameters 
+    page_num = int(request.args.get("pn", 1))
+    page_size = int(request.args.get("ps", 10))
+    skip = (page_num - 1) * page_size
+
+    # Filter parameter
+    status_filter = request.args.get("account_status", "all").lower()
+    query = {}
+
+    # Apply active/inactive filtering
+    if status_filter == "active":
+        query["active"] = True
+    elif status_filter == "inactive":
+        query["active"] = False
+    # if "all" no query condition added
+
+    # Fetch users (exclude sensitive fields)
+    users_cursor = users.find(query, {"_id": 0, "password": 0}) \
+                        .sort("created_at", 1) \
+                        .skip(skip) \
+                        .limit(page_size)
+
+    # Count and store results
+    users_list = list(users_cursor)
+    total_users = users.count_documents(query)
+    total_all_users = users.count_documents({})
+
+     # Log reactivate action for auditing purposes
+    log_admin_action(
+        request.user["username"],
+        "view_all_users",
+        "system"
+    )
+
+    return make_response(jsonify({
+        "page_num": page_num,
+        "page_size": page_size,
+        "total_filtered": total_users,
+        "total_all": total_all_users,
+        "status_filter": status_filter,
+        "returned": len(users_list),
+        "users": users_list
+    }), 200)
 
 # --- Remove User (ADMIN ONLY) ---
 def remove_user(username):
@@ -326,12 +374,4 @@ def refresh_token():
         return make_response(jsonify({"message": "Invalid refresh token"}), 401)
 
 # --- Generate Routes ---
-for path, func_name, methods, wrappers in auth_routes:
-    view_func = globals()[func_name]
-    # Apply wrappers (decorators) if specified
-    if wrappers:
-        for wrapper in wrappers:
-            view_func = wrapper(view_func)
-
-    #Register URL
-    auth_bp.add_url_rule(path, view_func=view_func, methods=methods)
+register_blueprint_routes(auth_bp, auth_routes, globals())

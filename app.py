@@ -9,10 +9,10 @@ from blueprints.titles.titles import titles_bp
 app = Flask(__name__)
 
 # Blueprints
-app.register_blueprint(audit_bp)
-app.register_blueprint(auth_bp)
-app.register_blueprint(reviews_bp)
-app.register_blueprint(titles_bp)
+app.register_blueprint(audit_bp, url_prefix="/api/v1.0/audit")
+app.register_blueprint(auth_bp, url_prefix="/api/v1.0/auth")
+app.register_blueprint(reviews_bp, url_prefix="/api/v1.0/reviews")
+app.register_blueprint(titles_bp, url_prefix="/api/v1.0/titles")
 
 # --- MAIN ENTRY POINT ---
 if __name__ == "__main__":

@@ -61,7 +61,7 @@ def jwt_required(func):
 def admin_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        #Get user attribute from request object
+        # Get user attribute from request object
         user = getattr(request, "user", None)
         if not user or not user.get("admin"):
             return make_response(jsonify({"error": "Admin privileges required"}), 403)
