@@ -2,8 +2,9 @@
 from flask import Blueprint, request, make_response, jsonify
 from globals import users, blacklist, SECRET_KEY
 from decorators import jwt_required, admin_required
-from datetime import datetime, timedelta, timezone
 from utils.audit import log_admin_action
+from datetime import datetime, timedelta, timezone
+from email_validator import validate_email, EmailNotValidError
 import secrets
 import jwt
 import bcrypt
@@ -11,48 +12,61 @@ import bcrypt
 # --- Define Auth Blueprint ---
 auth_bp = Blueprint("auth_bp", __name__)
 
-#
+# --- Route Definitions ---
 auth_routes = [
-    "/register", "register", ["POST"],
-    "/login", "login", ["POST"]
+    ("/api/v1.0/register", "register", ["POST"], []),
+    ("/api/v1.0/login", "login", ["POST"], []),
+    ("/api/v1.0/logout", "logout", ["POST"], [jwt_required]),
+    ("/api/v1.0/users/<string:username>", "remove_user", ["DELETE"], [jwt_required, admin_required]),
+    ("/api/v1.0/users/<string:username>/reactivate", "reactivate_user", ["PATCH"], [jwt_required, admin_required]),
+    ("/api/v1.0/users/<string:username>/deactivate", "deactivate_user", ["PATCH"], [jwt_required, admin_required]),
+    ("/api/v1.0/token/refresh", "refresh_token", ["POST"], []),
 ]
 
-# --- REGISTER USER ---
-@auth_bp.route("/api/v1.0/register", methods=["POST"])
-def register_user():
+# --- Register User ---
+def register():
     try:
-        # Accept JSON or form-data
-        data = request.get_json(silent=True) or request.form
+        # Get JSON data from the request body
+        data = request.get_json(silent=True) or {}
 
-        # Required fields
+        # Validate required fields 
         required_fields = ["username", "fullname", "email", "password"]
-        missing = [f for f in required_fields if f not in data or not data[f]]
+        missing = [f for f in required_fields if not data.get(f) or not str(data.get(f)).strip()]
         if missing:
-            return make_response(
-                jsonify({"error": f"Missing fields: {', '.join(missing)}"}), 400
-            )
+            return make_response(jsonify({"error": f"Missing or empty field(s): {', '.join(missing)}"}), 400)
 
+        # Normalize input data
         username = data["username"].strip().lower()
+        fullname = data["fullname"].strip()
         email = data["email"].strip().lower()
+        password = data["password"].strip()
 
-        # Check if user already exists
-        if users.find_one({"$or": [{"username": username}, {"email": email}]}):
-            return make_response(
-                jsonify({"error": "Username or email already in use"}), 409
-            )
+        # Validate email format 
+        validate_email(email)
 
-        # Hash the password securely
-        hashed_pw = bcrypt.hashpw(
-            data["password"].encode("utf-8"), bcrypt.gensalt()
+        # Check for existing user
+        existing_user = users.find_one(
+            {"$or": [{"username": username}, {"email": email}]},
+            {"username": 1, "email": 1, "_id": 0}
         )
 
+        # Return response based on field already in use.
+        if existing_user:
+            if existing_user.get("username") == username:
+                return make_response(jsonify({"error": "Username already in use"}), 409)
+        if existing_user.get("email") == email:
+            return make_response(jsonify({"error": "Email already in use"}), 409)
+
+        # Hash the password securely
+        hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
+
         # Generate a unique API key for the user
-        api_key = secrets.token_hex(24)  # 48-char unique key
+        api_key = secrets.token_hex(24)
 
         # Build the user document
         new_user = {
             "username": username,
-            "fullname": data["fullname"].strip(),
+            "fullname": fullname,
             "email": email,
             "password": hashed_pw,
             "admin": False,  # always false by default
@@ -64,33 +78,42 @@ def register_user():
         # Insert into MongoDB
         users.insert_one(new_user)
 
-        # Return confirmation
         return make_response(
             jsonify({
                 "message": "User registered successfully",
                 "username": username,
                 "api_key": api_key,
+                "Note": "Take a note of your unique API KEY, as this will be required for future requests"
             }), 201
         )
+    
+    #Exceptions
+    except EmailNotValidError as e:
+        return make_response(jsonify({"error": f"Invalid email address: {str(e)}"}), 400)
 
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
     
-# --- LOGIN USER ---
-@auth_bp.route("/api/v1.0/login", methods=["POST"])
-def login_user():
+# --- Login  ---
+def login():
     try:
-        # Get credentials
-        data = request.get_json(silent=True) or request.form
-        username = data.get("username", "").strip().lower()
-        password = data.get("password", "")
-        api_key = request.headers.get("x-api-key")
+        # Get and validate credentials
+        data = request.get_json(silent=True) or {}
 
-        # Validate presence
-        if not username or not password or not api_key:
-            return make_response(
-                jsonify({"error": "Username, password, and API key required"}), 400
-            )
+        username = (data.get("username") or "").strip().lower()
+        password = (data.get("password") or "").strip()
+        api_key = (request.headers.get("x-api-key") or "").strip()
+
+        # Validate required fields and collect missing ones
+        missing = []
+        if not username:
+            missing.append("username")
+        if not password:
+            missing.append("password")
+        if not api_key:
+            missing.append("x-api-key header")
+        if missing:
+            return make_response(jsonify({"error": f"Missing required field(s): {', '.join(missing)}"}), 400)
 
         # Check user exists
         user = users.find_one({"username": username})
@@ -109,26 +132,35 @@ def login_user():
         if not user.get("active", True):
             return make_response(jsonify({"error": "Account is deactivated. Contact an administrator."}), 403)
 
-        # Generate JWT
-        token = jwt.encode({
+        # Generate JWT access token
+        access_token = jwt.encode({
             "user": username,
             "admin": user.get("admin", False),
-            "exp": datetime.now(timezone.utc) + timedelta(hours=2)
+            "type": "access",
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=30)
         }, SECRET_KEY, algorithm="HS256")
+
+        # Generate JWT refresh token
+        refresh_token = jwt.encode({
+                    "user": username,
+                    "admin": user.get("admin", False),
+                    "type": "refresh",
+                    "exp": datetime.now(timezone.utc) + timedelta(days=7)
+                }, SECRET_KEY, algorithm="HS256")
 
         return make_response(
             jsonify({
                 "message": "Login successful",
-                "token": token,
+                "access_token": access_token,
+                "expiration": int((datetime.now(timezone.utc) + timedelta(minutes=30)).timestamp()),
+                "refresh_token": refresh_token
             }), 200
         )
 
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
-# --- LOGOUT USER ---
-@auth_bp.route("/api/v1.0/logout", methods=["POST"])
-@jwt_required 
+# --- Logout ---
 def logout():
     try:
         # Get access token from header
@@ -145,7 +177,7 @@ def logout():
         blacklist.insert_one({
             "token": token,
             "username": user.get("username"),
-            "blacklisted_at": datetime.now(timezone.utc)
+            "blacklisted_at": datetime.now(timezone.utc).isoformat()
         })
 
         return make_response(jsonify({"message": "Logout successful"}), 200)
@@ -153,18 +185,13 @@ def logout():
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
-# --- DELETE USER (ADMIN ONLY) ---
-@auth_bp.route("/api/v1.0/users/<string:username>", methods=["DELETE"])
-@jwt_required
-@admin_required
+# --- Remove User (ADMIN ONLY) ---
 def remove_user(username):
     try:
         # Prevent the ability for admins to delete themselves
         current_user = request.user.get("username")
         if current_user == username:
-            return make_response(jsonify({
-                "error": "Admins cannot delete their own account."
-            }), 400)
+            return make_response(jsonify({"error": "Admins cannot delete their own account."}), 400)
 
         # Attempt to find the user
         user = users.find_one({"username": username})
@@ -178,14 +205,12 @@ def remove_user(username):
         # Delete the user document
         result = users.delete_one({"username": username})
         if result.deleted_count == 1:
-
-            #
+            # Log delete action for auditing purposes
             log_admin_action(
                 request.user["username"],
                 "delete_user",
                 username
-            )
-                        
+            )                 
             return make_response(jsonify({"message": f"User '{username}' deleted successfully."}), 200)
         else:
             return make_response(jsonify({"error": "User deletion failed unexpectedly."}), 500)
@@ -193,60 +218,59 @@ def remove_user(username):
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
-# --- REACTIVATE USER (ADMIN ONLY) ---
-@auth_bp.route("/api/v1.0/users/<string:username>/reactivate", methods=["PATCH"])
-@jwt_required
-@admin_required
+# --- Reactivate User (ADMIN ONLY) ---
 def reactivate_user(username):
-    #
+    # Get JSON data from the request body
+    data = request.get_json(silent=True) or {}
+    reason = data.get("reason", "No reason provided")
+
+    # Check user exists
     user = users.find_one({"username": username})
     if not user:
         return make_response(jsonify({"error": "User not found"}), 404)
 
-    #
+    # Check if the user is already active
     if user.get("active", True):
         return make_response(jsonify({"message": "User already active"}), 200)
 
-    #
+    # Reactivate the user and clear deactivation fields
     users.update_one(
         {"username": username},
         {"$set": {"active": True}, "$unset": {"deactivated_at": "", "deactivation_reason": ""}}
     )
 
-    #
+    # Log reactivate action for auditing purposes
     log_admin_action(
         request.user["username"],
         "reactivate_user",
-        username
+        username,
+        {"reason": reason}
     )
 
     return make_response(jsonify({"message": f"User '{username}' reactivated"}), 200)
 
-# --- DEACTIVATE USER (ADMIN ONLY) ---
-@auth_bp.route("/api/v1.0/users/<string:username>/deactivate", methods=["PATCH"])
-@jwt_required
-@admin_required
+# --- Deactivate User (ADMIN ONLY) ---
 def deactivate_user(username):
-    #
+    # Get JSON data from the request body
     data = request.get_json(silent=True) or {}
     reason = data.get("reason", "No reason provided")
 
-    #
+    # Check user exists
     user = users.find_one({"username": username})
     if not user:
         return make_response(jsonify({"error": "User not found"}), 404)
 
-    #
+    # Check if the user is already inactive
     if not user.get("active", True):
         return make_response(jsonify({"message": "User already inactive"}), 200)
 
-    #
+    # Deactivate the user and record timestamp and reason for deactivation
     users.update_one(
         {"username": username},
         {"$set": {"active": False, "deactivated_at": datetime.now(timezone.utc).isoformat(), "deactivation_reason": reason}}
     )
 
-    #
+    # Log deactivate action for auditing purposes
     log_admin_action(
         request.user["username"],
         "deactivate_user",
@@ -258,3 +282,44 @@ def deactivate_user(username):
         "message": f"User '{username}' deactivated",
         "reason": reason
     }), 200)
+
+# --- Refresh Token ---
+def refresh_token():
+    # Get refresh token from JSON data in the request body
+    data = request.get_json()
+    refresh_token = data.get("refresh_token")
+    if not refresh_token:
+        return make_response(jsonify({"message": "Refresh token missing"}), 401)
+
+    try:
+        # Decode token and ensure it is a refresh token
+        decoded = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
+        if decoded.get("type") != "refresh":
+            return make_response(jsonify({"message": "Invalid refresh token type"}), 401)
+
+        # Issue new access token
+        new_access_token = jwt.encode({
+            "user": decoded["user"],
+            "admin": decoded.get("admin", False),
+            "type": "access",
+            "exp": datetime.now(timezone.utc) + timedelta(minutes=30)
+        }, SECRET_KEY, algorithm="HS256")
+
+        return make_response(jsonify({"access_token": new_access_token}), 200)
+
+    # Exceptions
+    except jwt.ExpiredSignatureError:
+        return make_response(jsonify({"message": "Refresh token expired"}), 401)
+    except jwt.InvalidTokenError:
+        return make_response(jsonify({"message": "Invalid refresh token"}), 401)
+
+# --- Generate Routes ---
+for path, func_name, methods, wrappers in auth_routes:
+    view_func = globals()[func_name]
+    # Apply wrappers (decorators) if specified
+    if wrappers:
+        for wrapper in wrappers:
+            view_func = wrapper(view_func)
+
+    #Register URL
+    auth_bp.add_url_rule(path, view_func=view_func, methods=methods)
