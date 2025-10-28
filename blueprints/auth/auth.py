@@ -1,6 +1,6 @@
 # --- Imports ---
 from flask import Blueprint, request, make_response, jsonify
-from globals import users, blacklist, SECRET_KEY
+from globals import  SECRET_KEY, TOKEN_EXPIRY, users, blacklist
 from decorators import jwt_required, admin_required
 from utils.audit import log_admin_action
 from utils.register_routes import register_blueprint_routes
@@ -9,6 +9,7 @@ from email_validator import validate_email, EmailNotValidError
 import secrets
 import jwt
 import bcrypt
+import uuid
 
 # --- Define Auth Blueprint ---
 auth_bp = Blueprint("auth_bp", __name__)
@@ -37,13 +38,11 @@ def register():
         if missing:
             return make_response(jsonify({"error": f"Missing or empty field(s): {', '.join(missing)}"}), 400)
 
-        # Normalize input data
+        # Normalize and validate input data
         username = data["username"].strip().lower()
         fullname = data["fullname"].strip()
         email = data["email"].strip().lower()
         password = data["password"].strip()
-
-        # Validate email format 
         validate_email(email)
 
         # Check for existing user
@@ -56,8 +55,8 @@ def register():
         if existing_user:
             if existing_user.get("username") == username:
                 return make_response(jsonify({"error": "Username already in use"}), 409)
-        if existing_user.get("email") == email:
-            return make_response(jsonify({"error": "Email already in use"}), 409)
+            if existing_user.get("email") == email:
+                return make_response(jsonify({"error": "Email already in use"}), 409)
 
         # Hash the password securely
         hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
@@ -85,14 +84,13 @@ def register():
                 "message": "User registered successfully",
                 "username": username,
                 "api_key": api_key,
-                "info": "Take a note of your unique API KEY, as this will be required when making future requests"
+                "info": "Take a note of your unique API key, as this will be required when making future requests"
             }), 201
         )
     
     #Exceptions
     except EmailNotValidError as e:
         return make_response(jsonify({"error": f"Invalid email address: {str(e)}"}), 400)
-
     except Exception as e:
         return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
     
@@ -133,21 +131,27 @@ def login():
         if not user.get("active", True):
             return make_response(jsonify({"error": "Account is deactivated. Contact an administrator."}), 403)
 
+        # Get token issuer and if the user is an admin
+        issuer = request.url
+        admin = user.get("admin", False)
+
         # Generate JWT access token
-        access_token = jwt.encode({
-            "user": username,
-            "admin": user.get("admin", False),
-            "type": "access",
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=30)
-        }, SECRET_KEY, algorithm="HS256")
+        access_token = generate_token(
+            username, 
+            admin, 
+            "access",
+            issuer,
+            minutes=TOKEN_EXPIRY["access_minutes"]
+        )
 
         # Generate JWT refresh token
-        refresh_token = jwt.encode({
-                    "user": username,
-                    "admin": user.get("admin", False),
-                    "type": "refresh",
-                    "exp": datetime.now(timezone.utc) + timedelta(days=7)
-                }, SECRET_KEY, algorithm="HS256")
+        refresh_token = generate_token(
+            username,
+            admin,
+            "refresh",
+            issuer,
+            days=TOKEN_EXPIRY["refresh_days"]
+        )
 
         return make_response(
             jsonify({
@@ -170,15 +174,19 @@ def logout():
         if not token:
             return make_response(jsonify({"error": "Missing JWT access token"}), 400)
 
+        # Decode token and get JTI and username to blacklist
+        decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
+        jti = decoded.get("jti")
+        username = decoded.get("user")
+
         # Check if token already blacklisted
-        if blacklist.find_one({"token": token}):
+        if blacklist.find_one({"jti": jti}):
             return make_response(jsonify({"message": "Token already blacklisted"}), 200)
 
         # Record token invalidation with timestamp and user info
-        user = getattr(request, "user", None)
         blacklist.insert_one({
-            "token": token,
-            "username": user.get("username"),
+            "jti": jti,
+            "username": username,
             "blacklisted_at": datetime.now(timezone.utc).isoformat()
         })
 
@@ -190,49 +198,54 @@ def logout():
     
 # --- Get All Registered Users ---
 def get_all_users():
- # Pagination parameters 
-    page_num = int(request.args.get("pn", 1))
-    page_size = int(request.args.get("ps", 10))
-    skip = (page_num - 1) * page_size
+    try:
+        # Pagination parameters 
+        page_num = int(request.args.get("pn", 1))
+        page_size = int(request.args.get("ps", 10))
+        skip = (page_num - 1) * page_size
+    
+        # Filter parameter
+        status_filter = request.args.get("account_status", "all").lower()
+    
+        # Apply active/inactive filtering
+        query = {}
+        if status_filter == "active":
+            query["active"] = True
+        elif status_filter == "inactive":
+            query["active"] = False
+        # if "all" no query condition added
+    
+        # Fetch users (exclude sensitive fields)
+        users_cursor = users.find(query, {"_id": 0, "password": 0}) \
+                            .sort("created_at", 1) \
+                            .skip(skip) \
+                            .limit(page_size)
+    
+        # Count and store results
+        users_list = list(users_cursor)
+        total_users = users.count_documents(query)
+        total_all_users = users.count_documents({})
+    
+        # Log reactivate action for auditing purposes
+        log_admin_action(
+            request.user["username"],
+            "view_all_users",
+            "system"
+        )
+    
+        return make_response(jsonify({
+            "page_num": page_num,
+            "page_size": page_size,
+            "total_filtered": total_users,
+            "total_all": total_all_users,
+            "status_filter": status_filter,
+            "returned": len(users_list),
+            "users": users_list
+        }), 200)
 
-    # Filter parameter
-    status_filter = request.args.get("account_status", "all").lower()
-    query = {}
-
-    # Apply active/inactive filtering
-    if status_filter == "active":
-        query["active"] = True
-    elif status_filter == "inactive":
-        query["active"] = False
-    # if "all" no query condition added
-
-    # Fetch users (exclude sensitive fields)
-    users_cursor = users.find(query, {"_id": 0, "password": 0}) \
-                        .sort("created_at", 1) \
-                        .skip(skip) \
-                        .limit(page_size)
-
-    # Count and store results
-    users_list = list(users_cursor)
-    total_users = users.count_documents(query)
-    total_all_users = users.count_documents({})
-
-     # Log reactivate action for auditing purposes
-    log_admin_action(
-        request.user["username"],
-        "view_all_users",
-        "system"
-    )
-
-    return make_response(jsonify({
-        "page_num": page_num,
-        "page_size": page_size,
-        "total_filtered": total_users,
-        "total_all": total_all_users,
-        "status_filter": status_filter,
-        "returned": len(users_list),
-        "users": users_list
-    }), 200)
+    # General Exception
+    except Exception as e:
+        return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
 
 # --- Remove User (ADMIN ONLY) ---
 def remove_user(username):
@@ -255,11 +268,7 @@ def remove_user(username):
         result = users.delete_one({"username": username})
         if result.deleted_count == 1:
             # Log delete action for auditing purposes
-            log_admin_action(
-                request.user["username"],
-                "delete_user",
-                username
-            )                 
+            log_admin_action(request.user["username"], "delete_user",username)                 
             return make_response(jsonify({"message": f"User '{username}' deleted successfully."}), 200)
         else:
             return make_response(jsonify({"error": "User deletion failed unexpectedly."}), 500)
@@ -291,13 +300,8 @@ def reactivate_user(username):
         )
     
         # Log reactivate action for auditing purposes
-        log_admin_action(
-            request.user["username"],
-            "reactivate_user",
-            username,
-            {"reason": reason}
-        )
-    
+        log_admin_action(request.user["username"], "reactivate_user", username,{"reason": reason})
+
         return make_response(jsonify({"message": f"User '{username}' reactivated"}), 200)
     
     # General Exception
@@ -327,12 +331,7 @@ def deactivate_user(username):
         )
     
         # Log deactivate action for auditing purposes
-        log_admin_action(
-            request.user["username"],
-            "deactivate_user",
-            username,
-            {"reason": reason}
-        )  
+        log_admin_action(request.user["username"], "deactivate_user", username, {"reason": reason})  
     
         return make_response(jsonify({
             "message": f"User '{username}' deactivated",
@@ -345,33 +344,64 @@ def deactivate_user(username):
 
 # --- Refresh Token ---
 def refresh_token():
-    # Get refresh token from JSON data in the request body
-    data = request.get_json()
-    refresh_token = data.get("refresh_token")
-    if not refresh_token:
-        return make_response(jsonify({"message": "Refresh token missing"}), 401)
-
     try:
+        # Get refresh token from JSON data in the request body
+        data = request.get_json()
+        refresh_token = data.get("refresh_token")
+        if not refresh_token:
+            return make_response(jsonify({"message": "Refresh token missing"}), 401)
+
         # Decode token and ensure it is a refresh token
         decoded = jwt.decode(refresh_token, SECRET_KEY, algorithms=["HS256"])
         if decoded.get("type") != "refresh":
             return make_response(jsonify({"message": "Invalid refresh token type"}), 401)
+        
+        # Check for blacklisted token by jti 
+        if blacklist.find_one({"jti": decoded["jti"]}):
+            return make_response(jsonify({"error": "Refresh token has been blacklisted"}), 401)
+
+        # Get token issuer
+        issuer = request.url
 
         # Issue new access token
-        new_access_token = jwt.encode({
-            "user": decoded["user"],
-            "admin": decoded.get("admin", False),
-            "type": "access",
-            "exp": datetime.now(timezone.utc) + timedelta(minutes=30)
-        }, SECRET_KEY, algorithm="HS256")
+        new_access_token = generate_token(
+            decoded["user"],
+            decoded.get("admin", False),
+            "access",
+            issuer,
+            minutes=TOKEN_EXPIRY["access_minutes"]
+        )
 
         return make_response(jsonify({"access_token": new_access_token}), 200)
 
     # Exceptions
     except jwt.ExpiredSignatureError:
-        return make_response(jsonify({"message": "Refresh token expired"}), 401)
+        return make_response(jsonify({"message": "Refresh token expired"}), 401)  
     except jwt.InvalidTokenError:
         return make_response(jsonify({"message": "Invalid refresh token"}), 401)
+    except Exception as e:
+        return make_response(jsonify({"error": f"Server error: {str(e)}"}), 500)
+
+# --- Generate Tokens ---
+def generate_token(username, admin, token_type, issuer, **expiration):
+    # Current UTC time
+    now = datetime.now(timezone.utc)
+
+    # JWT payload data
+    payload = {
+        "user": username,
+        "admin": admin,
+        "type": token_type,
+        "iss": issuer,
+        "nbf": now,
+        "iat": now,
+        "exp": now + timedelta(**expiration),
+        "jti": str(uuid.uuid4())
+    }
+
+    # Encode payload into JWT using secret key and return token
+    token = jwt.encode(payload, SECRET_KEY, algorithm="HS256")  
+    return token
 
 # --- Generate Routes ---
 register_blueprint_routes(auth_bp, auth_routes, globals())

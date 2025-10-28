@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 
 # --- LOG ADMIN ACTIONS ---
 def log_admin_action(admin_username, action, target_user, details=None):
+    # Create log entry and insert into audit_logs collection
     entry = {
         "admin": admin_username,
         "action": action,

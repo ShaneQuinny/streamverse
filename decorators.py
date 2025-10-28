@@ -2,25 +2,22 @@
 from flask import request, jsonify, make_response
 import jwt
 from functools import wraps
-from globals import SECRET_KEY, blacklist, users
+from globals import SECRET_KEY, VALID_ISSUERS, blacklist, users
+from datetime import datetime, timezone
 
 # --- JWT REQUIRED WRAPPER ---
 def jwt_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # --- Check for JWT ---
+        # Check for JWT
         token = request.headers.get("x-access-token")
         if not token:
             return make_response(jsonify({"error": "Missing JWT token"}), 401)
 
-        # --- Check for API key ---
+        # Check for API key 
         api_key = request.headers.get("x-api-key")
         if not api_key:
             return make_response(jsonify({"error": "Missing API key"}), 401)
-
-        # --- Check if token is blacklisted ---
-        if blacklist.find_one({"token": token}):
-            return make_response(jsonify({"error": "Token has been blacklisted"}), 401)
 
         try:
             # Decode the JWT
@@ -29,6 +26,24 @@ def jwt_required(func):
                 SECRET_KEY, 
                 algorithms=["HS256"])
             
+            # Check for blacklisted token by jti 
+            if blacklist.find_one({"jti": decoded["jti"]}):
+                return make_response(jsonify({"error": "Token has been blacklisted"}), 401)
+            
+            # Only allow access tokens
+            if decoded.get("type") != "access":
+                return make_response(jsonify({"error": "Invalid token type"}), 403)
+            
+            # Ensure token is valid for use
+            now = datetime.now(timezone.utc)
+            if decoded.get("nbf") and now < datetime.fromtimestamp(decoded["nbf"], timezone.utc):
+                return make_response(jsonify({"error": "Token not yet valid"}), 401)
+            
+            # Verify issuer
+            if decoded.get("iss") not in VALID_ISSUERS:
+                return make_response(jsonify({
+                    "error": f"Invalid token issuer: {decoded.get('iss')}"}), 403)
+
             # Get the user from the decoded JWT
             username = decoded.get("user")
 
@@ -37,14 +52,17 @@ def jwt_required(func):
             if not user:
                 return make_response(jsonify({"error": "User not found"}), 404)
 
+            # Ensure user has correct API key
             if user["api_key"] != api_key:
                 return make_response(jsonify({"error": "Invalid API key"}), 403)
             
+            # Ensure user is active
             if not user.get("active", True):
                 return make_response(jsonify({"error": "Account is deactivated"}), 403)
 
             # If everything is authenticated, attach user info to the request context
             request.user = user
+            request.jwt_id = decoded["jti"]
 
         # Exceptions
         except jwt.ExpiredSignatureError:
