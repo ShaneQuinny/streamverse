@@ -36,6 +36,13 @@ class IAuthService(ABC):
         pass
 
     @abstractmethod
+    def get_user(self, username, current_admin):
+        """
+        Get a single registered user from the system.
+        """
+        pass
+
+    @abstractmethod
     def remove_user(self, username, current_admin):
         """
         Permanently remove a user from the system.

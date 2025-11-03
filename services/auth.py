@@ -206,6 +206,21 @@ class AuthService(IAuthService):
         # General Exception
         except Exception as e:
                 return {"error": f"Server error: {str(e)}"}, 500
+    
+    def get_user(self, username, current_admin):
+        try:
+            # Attempt to find the user (exclude sensitive fields)
+            user = self.users.find_one({"username": username}, {"_id": 0, "password": 0})
+            if not user:
+                return {"error": f"User '{username}' not found."}, 404
+            
+            # Log view all users action for auditing purposes and return data back to blueprint
+            log_admin_action(current_admin, "get_user", "system", {"action": f"previewed user profile: {username}"})
+            return {"user": user}, 200
+        
+        # General Exception
+        except Exception as e:
+            return {"error": f"Server error: {str(e)}"}, 500
         
     def remove_user(self, username, current_admin):
         try:

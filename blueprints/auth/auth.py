@@ -17,7 +17,7 @@ def register():
     result, statusCode = auth_service.register(data)
     return make_response(jsonify(result), statusCode)
     
-# --- Login  ---
+# --- Login ---
 def login():
     # Get JSON data from the request body and API key in header
     data = request.get_json(silent=True) or {}
@@ -37,7 +37,7 @@ def logout():
     result, statusCode = auth_service.logout(token)
     return make_response(jsonify(result), statusCode)
     
-# --- Get All Registered Users ---
+# --- Get All Registered Users (ADMIN ONLY) ---
 def get_all_users():
     # Pagination and filterparameters 
     pn = int(request.args.get("pn", 1))
@@ -46,6 +46,12 @@ def get_all_users():
 
     # Get and return data and status code from service class
     result, statusCode = auth_service.get_all_users(pn, ps, status_filter, request.user["username"])
+    return make_response(jsonify(result), statusCode)
+
+# --- Get Single Registered User (ADMIN ONLY) ---  
+def get_user(username):
+     # Get and return data and status code from service class
+    result, statusCode = auth_service.get_user(username, request.user["username"])
     return make_response(jsonify(result), statusCode)
 
 # --- Remove User (ADMIN ONLY) ---
@@ -91,6 +97,7 @@ auth_routes = [
     ("/login", "login", ["POST"], []),
     ("/logout", "logout", ["POST"], [jwt_required]),
     ("/users", "get_all_users", ["GET"], [jwt_required, admin_required]),
+    ("/users/<string:username>", "get_user", ["GET"], [jwt_required, admin_required]),
     ("/users/<string:username>", "remove_user", ["DELETE"], [jwt_required, admin_required]),
     ("/users/<string:username>/reactivate", "reactivate_user", ["PATCH"], [jwt_required, admin_required]),
     ("/users/<string:username>/deactivate", "deactivate_user", ["PATCH"], [jwt_required, admin_required]),
