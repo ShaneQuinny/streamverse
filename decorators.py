@@ -4,17 +4,18 @@ import jwt
 from functools import wraps
 from globals import SECRET_KEY, VALID_ISSUERS, blacklist, users
 from datetime import datetime, timezone
+from utils.response import api_response
 
-# --- JWT REQUIRED WRAPPER ---
+# --- JWT Required Wrapper ---
 def jwt_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Check for JWT
+        # Check for JWT in request headers
         token = request.headers.get("x-access-token")
         if not token:
             return make_response(jsonify({"error": "Missing JWT token"}), 401)
 
-        # Check for API key 
+        # Check for API key in request headers
         api_key = request.headers.get("x-api-key")
         if not api_key:
             return make_response(jsonify({"error": "Missing API key"}), 401)
@@ -30,7 +31,7 @@ def jwt_required(func):
             if blacklist.find_one({"jti": decoded["jti"]}):
                 return make_response(jsonify({"error": "Token has been blacklisted"}), 401)
             
-            # Only allow access tokens
+            # Allow only access tokens
             if decoded.get("type") != "access":
                 return make_response(jsonify({"error": "Invalid token type"}), 403)
             
@@ -75,14 +76,23 @@ def jwt_required(func):
         return func(*args, **kwargs)
     return wrapper
 
-# --- ADMIN REQUIRED WRAPPER ---
+# --- Admin Required Wrapper ---
 def admin_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Get user attribute from request object
+        # Get user attribute from request object (change?)
         user = getattr(request, "user", None)
         if not user or not user.get("admin"):
             return make_response(jsonify({"error": "Admin privileges required"}), 403)
         
         return func(*args, **kwargs)
+    return wrapper
+
+# --- Json Response Wrapper ---
+def json_response(func):
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Get the result and status code from function and return a json response
+        result, status_code = func(*args, **kwargs)
+        return api_response(result, status_code)
     return wrapper

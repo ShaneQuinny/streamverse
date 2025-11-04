@@ -1,6 +1,5 @@
 # --- Imports ---
 from pymongo import MongoClient
-from flask import request
 
 # --- CONSTS ---
 SECRET_KEY = "streamverse_secret"
@@ -13,6 +12,7 @@ TOKEN_EXPIRY = {
     "access_minutes": 30,   # Access tokens last 30 minutes
     "refresh_days": 7       # Refresh tokens last 7 days
 }
+API_VERSION = "1.0"
 
 # Connect to MongoDB running locally on default port 27017
 client = MongoClient(MONGO_URL)
