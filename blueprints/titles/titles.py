@@ -126,6 +126,8 @@ def add_title():
     
         # Insert into MongoDB
         result = titles.insert_one(new_title)
+        if not result.acknowledged:
+            return {"error": "Title could not be added. Contact an admin for further investigation."}, 500
         
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return {
@@ -169,7 +171,7 @@ def edit_title(title_id):
         # Update the title document ensure all changes were applied to user document
         result = titles.update_one({"_id": ObjectId(title_id)}, {"$set": data})
         if result.matched_count == 0:
-            return {"message": "No updates were applied. Contact admin for further investigation."}, 500
+            return {"message": "No updates were applied. Contact an admin for further investigation."}, 500
 
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return {
@@ -198,7 +200,7 @@ def delete_title(title_id):
         # Ensure title was deleted
         result = titles.delete_one({"_id": ObjectId(title_id)})
         if result.deleted_count == 0:
-            return {"error": "Deletion failed unexpectedly. Contact admin for further investigation."}, 500
+            return {"error": "Deletion failed unexpectedly. Investigate database collection for further information."}, 500
         
         # Log delete action for auditing purposes
         log_admin_action(current_admin, "delete_title", SYSTEM_ACTION, 
