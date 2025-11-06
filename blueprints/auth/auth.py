@@ -5,7 +5,7 @@ from globals import SECRET_KEY, TOKEN_EXPIRY, users, blacklist
 from email_validator import validate_email, EmailNotValidError
 from decorators import jwt_required, json_response
 from utils.register_routes import register_blueprint_routes
-import bcrypt, jwt, secrets, uuid
+import bcrypt, jwt, uuid
 
 """
 This blueprint manages user authentication and authorization within the StreamVerse API.
@@ -51,9 +51,6 @@ def register():
         # Hash the password securely
         hashed_pw = bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt())
 
-        # Generate a unique API key for the user
-        api_key = secrets.token_hex(24)
-
         # Build the user document
         new_user = {
             "username": username,
@@ -61,7 +58,6 @@ def register():
             "email": email,
             "password": hashed_pw,
             "admin": False,  # always false by default
-            "api_key": api_key,
             "active": True,
             "created_at": datetime.now(timezone.utc).isoformat()
         }
@@ -72,9 +68,7 @@ def register():
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return {
             "message": "User registered successfully",
-            "username": username,
-            "api_key": api_key,
-            "info": "Take note of your unique API key for future requests."
+            "username": username
         }, 201
         
     #Exceptions
@@ -86,13 +80,12 @@ def register():
 # --- Login ---
 def login():
     try:
-        # Get JSON data from the request body and API key from request header
+        # Get JSON data from the request body
         data = request.get_json(silent=True) or {}
-        api_key = request.headers.get("x-api-key")
 
         # Get credentials
-        username = (data.get("username")).strip().lower()
-        password = (data.get("password")).strip()
+        username = (data.get("username", "")).strip().lower()
+        password = (data.get("password", "")).strip()
 
         # Validate required fields and collect missing ones
         missing = []
@@ -100,8 +93,6 @@ def login():
             missing.append("username")
         if not password:
             missing.append("password")
-        if not api_key:
-            missing.append("x-api-key header")
         if missing:
             return {"error": f"Missing required field(s): {', '.join(missing)}"}, 400
         
@@ -109,10 +100,6 @@ def login():
         user = users.find_one({"username": username})
         if not user:
             return {"error": "Invalid username"}, 401
-
-        # Check API key match
-        if user["api_key"] != api_key:
-            return {"error": "Invalid API key"}, 403
 
         # Check password match
         if not bcrypt.checkpw(password.encode("utf-8"), user["password"]):
@@ -162,7 +149,7 @@ def login():
 def logout():
     try:
         # Get access token from header
-        token = request.headers.get("x-access-token")
+        token = request.headers.get("Bearer")
 
         # Decode token and get JTI and username to blacklist
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])

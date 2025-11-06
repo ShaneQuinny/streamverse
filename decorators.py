@@ -11,14 +11,9 @@ def jwt_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
         # Check for JWT in request headers
-        token = request.headers.get("x-access-token")
+        token = request.headers.get("Bearer")
         if not token:
             return api_response({"error": "Missing JWT token"}, 401)
-
-        # Check for API key in request headers
-        api_key = request.headers.get("x-api-key")
-        if not api_key:
-            return api_response({"error": "Missing API key"}, 401)
 
         try:
             # Decode the JWT
@@ -43,14 +38,10 @@ def jwt_required(func):
             # Get the user from the decoded JWT
             username = decoded.get("user")
 
-            # Find user and confirm API key matches the user who owns this token
+            # Attempt to find user who owns this token
             user = users.find_one({"username": username})
             if not user:
                 return api_response({"error": "User not found"}, 404)
-
-            # Ensure user has correct API key
-            if user["api_key"] != api_key:
-                return api_response({"error": "Invalid API key"}, 403)
             
             # Ensure user is active
             if not user.get("active", True):
