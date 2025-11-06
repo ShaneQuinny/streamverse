@@ -2,12 +2,8 @@
 from pymongo import MongoClient
 
 # --- CONSTS ---
-SECRET_KEY = "streamverse_secret"
+SECRET_KEY = "9d2a4a1a5f8444a3bb6a18e79b676af0d0738f15e7a66dfb2cd7a7d65b60cccb" # Generated from: https://jwtsecrets.com/
 MONGO_URL = "mongodb://127.0.0.1:27017"
-VALID_ISSUERS = [
-    "http://localhost:5000/api/v1.0/streamverse/auth/login",
-    "http://localhost:5000/api/v1.0/streamverse/auth/token/refresh"
-]
 TOKEN_EXPIRY = {
     "access_minutes": 30,   # Access tokens last 30 minutes
     "refresh_days": 7       # Refresh tokens last 7 days

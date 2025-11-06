@@ -25,25 +25,43 @@ def view_audit_logs():
         page_size = int(request.args.get("ps", 10))
         skip = (page_num - 1) * page_size
 
-        # Fetch logs from MongoDB with most recent first and convert ID to JSON string
-        logs = list(audit_logs.find().sort("timestamp", -1).skip(skip).limit(page_size))
+        # Extract filter parameters (Default all)
+        type_filter = request.args.get("admin", "all").lower()
+        cast_filter = request.args.get("action", "all").lower()
+
+        # Filtering query
+        query = {}
+        if type_filter != "all":
+            query["admin"] = type_filter
+        if cast_filter != "all":
+            query["action"] = cast_filter
+
+        # Sorting (Default timestamp and desc)
+        sort_field = request.args.get("sort_by", "timestamp")
+        sort_order = request.args.get("sort_order", "desc")
+        sort_direction = 1 if sort_order == "asc" else -1 
+
+        # Fetch audit logs from collection with applied filters and sorting, then convert ObjectId to JSON string
+        logs = list(audit_logs.find(query).sort(sort_field, sort_direction).skip(skip).limit(page_size))
         for log in logs:
             log["_id"] = str(log["_id"])
     
         # Pagination stats    
-        total_docs = audit_logs.count_documents({})
-        total_pages = math.ceil(total_docs / page_size)
-    
+        total_audit_logs_filtered = audit_logs.count_documents(query)
+        total_audit_logs = audit_logs.count_documents({})
+        total_pages = math.ceil(total_audit_logs_filtered / page_size)
+
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return {
             "page_num": page_num,
             "page_size": page_size,
-            "total_audit_logs": total_docs,
             "total_pages": total_pages,
+            "total_audit_logs": total_audit_logs,
+            "total_audit_logs_filtered": total_audit_logs_filtered,
+            "sorting_direction": sort_order,
             "audit_logs": logs
         }, 200
 
-    # General Exception
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 
@@ -62,8 +80,7 @@ def get_audit_log(log_id):
         # Return the raw response data (with ObjectId converted to string) and status code to the json_response wrapper to be serialized
         audit_log["_id"] = str(audit_log["_id"])
         return audit_log, 200
-        
-    # General Exception
+
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 
@@ -103,8 +120,7 @@ def view_audit_stats():
             "total_admins": len(auditStats),
             "summary": auditStats
         }, 200
-            
-    # General Exception
+
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 
@@ -118,15 +134,16 @@ def prune_audit_logs():
         cutoff = datetime.now(timezone.utc) - timedelta(days=days)
     
         # Delete old audit records from the collection
-        deleted = audit_logs.delete_many({"timestamp": {"$lt": cutoff}})
+        result = audit_logs.delete_many({"timestamp": {"$lt": cutoff}})
+        if result.deleted_count == 0:
+            return {"error": "Deletion failed unexpectedly. Investage database collection for further information."}, 500
     
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return {
-            "message": f"Deleted {deleted.deleted_count} old audit logs",
+            "message": f"Deleted {result.deleted_count} old audit logs",
             "cutoff_date": cutoff.isoformat()
         }, 200
-        
-    # General Exception
+
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 

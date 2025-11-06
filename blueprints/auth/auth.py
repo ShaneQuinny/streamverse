@@ -91,8 +91,8 @@ def login():
         api_key = request.headers.get("x-api-key")
 
         # Get credentials
-        username = (data.get("username") or "").strip().lower()
-        password = (data.get("password") or "").strip()
+        username = (data.get("username")).strip().lower()
+        password = (data.get("password")).strip()
 
         # Validate required fields and collect missing ones
         missing = []
@@ -217,9 +217,13 @@ def refresh_token():
         
     # Exceptions
     except jwt.ExpiredSignatureError:
-        return {"message": "Refresh token expired"}, 401
+        return {"error": "Refresh token expired"}, 401
+    except jwt.InvalidIssuerError:
+        return {"error": "Invalid token issuer"}, 403
+    except jwt.InvalidIssuedAtError:
+        return {"error": "Invalid token issued-at time"}, 403
     except jwt.InvalidTokenError:
-        return {"message": "Invalid refresh token"}, 401
+        return {"error": "Invalid refresh token"}, 401
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 

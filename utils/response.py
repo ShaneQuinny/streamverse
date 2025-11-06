@@ -1,7 +1,7 @@
 # --- Imports ---
 from flask import jsonify, make_response
 
-# --- Shared API Response Functionality ---
+# --- Shared API Response ---
 def api_response(data=None, status_code=200, success=None):
     # If no data is present for request body (e.g. 201 created response) store an empty body
     if data is None:

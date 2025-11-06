@@ -12,7 +12,7 @@ from blueprints.users.users import users_bp
 app = Flask(__name__)
 
 # Define base API prefix
-API_PREFIX = f"/api/v{API_VERSION}/streamverse"
+API_PREFIX = f"/api/v{API_VERSION}"
 
 # Register Blueprints
 app.register_blueprint(audit_bp, url_prefix=f"{API_PREFIX}/audit")

@@ -5,7 +5,7 @@ from globals import users
 from utils.register_routes import register_blueprint_routes
 from utils.audit import log_admin_action, SYSTEM_ACTION
 from datetime import datetime, timezone
-import bcrypt
+import bcrypt, math
 
 """
 This blueprint manages all user admin operations within the StreamVerse API.
@@ -27,28 +27,35 @@ def get_all_users():
         page_size = int(request.args.get("ps", 10))
         skip = (page_num - 1) * page_size
 
-        # Optional filtering
+        # Filtering
         status_filter = request.args.get("account_status", "all").lower()
+        user_role_filter = request.args.get("user_role", "all").lower()
+
+        # Sorting
         sort_by = request.args.get("sort_by", "created_at")      
         sort_order = request.args.get("sort_order", "desc").lower()
-
-        # Determine sort direction
         sort_direction = 1 if sort_order == "asc" else -1 
 
         # Construct the query with active/inactive filtering
         query = {}
-        if status_filter == "active":
-            query["active"] = True
-        elif status_filter == "inactive":
-            query["active"] = False
+        if status_filter in ("active", "inactive"):
+            query["active"] = (status_filter == "active")
+
+        # Filter by user role
+        if user_role_filter != "all":
+            if user_role_filter == "admin":
+                query["admin"] = True
+            else:
+                query["admin"] = False
+        
         
         # Fetch users (exclude sensitive fields) with pagination and filtering
-        users_cursor = users.find(query, {"_id": 0, "password": 0}).sort(sort_by, sort_direction).skip(skip).limit(page_size)
+        users_cursor = list(users.find(query, {"_id": 0, "password": 0}).sort(sort_by, sort_direction).skip(skip).limit(page_size))
     
         # Count and store results
-        users_list = list(users_cursor)
         total_users_filtered = users.count_documents(query)
         total_all_users = users.count_documents({})
+        total_pages = math.ceil(total_users_filtered / page_size)
 
         # Log view all users action for auditing purposes
         log_admin_action(current_admin, "view_all_users", SYSTEM_ACTION)
@@ -57,13 +64,13 @@ def get_all_users():
         return {
             "page_num": page_num,
             "page_size": page_size,
+            "total_pages": total_pages,
+            "total_users": total_all_users,
             "total_filtered": total_users_filtered,
-            "total_all": total_all_users,
-            "status_filter": status_filter,
-            "users": users_list
+            "sorting_direction": sort_order,
+            "users": users_cursor
         }, 200
         
-    # General Exception
     except Exception as e:
             return {"error": f"Server error: {str(e)}"}, 500
 
@@ -84,7 +91,6 @@ def get_user(username):
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return {"user": user}, 200
         
-    # General Exception
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500       
 
@@ -134,7 +140,7 @@ def update_user_details(username):
         # Update the user document and ensure all changes were applied
         result = users.update_one({"username": username}, {"$set": update_fields})
         if result.modified_count == 0:
-            return {"message": f"No changes applied for user '{username}'."}, 200
+            return {"message": f"No changes applied for user '{username}'. Contact admin for further investigation."}, 500
         
         # Store updated fields
         changed_fields = list(update_fields.keys())
@@ -149,7 +155,6 @@ def update_user_details(username):
             "updated_at": now,
         }, 200
 
-    # General Exception
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 
@@ -204,7 +209,7 @@ def reset_user_password(username):
 
         # Ensure all changes were applied to user document
         if result.modified_count == 0:
-            return {"message": f"Updated password was not applied for user '{username}'."}, 200
+            return {"message": f"Updated password was not applied for user '{username}'. Contact admin for further investigation."}, 500
         
         # Log get user action for auditing purposes
         log_admin_action(current_admin, "reset_user_password", username, {"action": f"Reset user '{username}' password."})
@@ -215,7 +220,6 @@ def reset_user_password(username):
             "updated_at": datetime.now(timezone.utc).isoformat()
         }, 200
 
-    # General Exception
     except Exception as e:
         return {"message": f"Server error: {str(e)}"}, 500
 
@@ -241,7 +245,7 @@ def remove_user(username):
         # Delete the user document and ensure all user was successfully deleted
         result = users.delete_one({"username": username})
         if result.deleted_count == 0:
-            return {"error": f"Failed to delete user '{username}'. User may not exist."}, 404
+            return {"error": f"Failed to delete user '{username}'. Contact admin for further investigation."}, 500
             
         # Log delete action for auditing purposes 
         log_admin_action(current_admin, "delete_user", username, {"action": f"User '{username}' permanently deleted."})
@@ -249,20 +253,11 @@ def remove_user(username):
         # Return No Content status code to the json_response wrapper to be serialized
         return 204
     
-    # General Exception
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 
 # --- Reactivate User ---
 def reactivate_user(username):
-    return change_user_status(username, True)
-
-# --- Deactivate User ---
-def deactivate_user(username):
-    return change_user_status(username, False)
-
-# --- Helper: Handles activate/deactivate user operations ---
-def change_user_status(username, activate: bool):
     # Get JSON data from the request body
     data = request.get_json(silent=True) or {}
     reason = data.get("reason", "No reason provided")
@@ -271,7 +266,19 @@ def change_user_status(username, activate: bool):
     current_admin = request.user["username"]
 
     # Return the raw response data and status code to the json_response wrapper to be serialized
-    return set_user_active_status(username, activate, reason, current_admin)
+    return set_user_active_status(username, True, reason, current_admin)
+
+# --- Deactivate User ---
+def deactivate_user(username):
+    # Get JSON data from the request body
+    data = request.get_json(silent=True) or {}
+    reason = data.get("reason", "No reason provided")
+
+    # Get the current admin username
+    current_admin = request.user["username"]
+
+    # Return the raw response data and status code to the json_response wrapper to be serialized
+    return set_user_active_status(username, False, reason, current_admin)
 
 # --- Helper: Set the user active status ---
 def set_user_active_status(username, active, reason, current_admin):
@@ -312,7 +319,7 @@ def set_user_active_status(username, active, reason, current_admin):
         # Update the user document and ensure all changes were applied
         result = users.update_one({"username": username}, update_query)
         if result.modified_count == 0:
-            return {"message": f"No changes applied for user '{username}'."}, 200
+            return {"message": f"No changes applied for user '{username}'. Contact admin for further investigation."}, 500
 
         # Log reactivation/deactivation action for auditing purposes
         log_admin_action(current_admin, action, username, {"reason": reason})
@@ -325,7 +332,6 @@ def set_user_active_status(username, active, reason, current_admin):
         # Return the raw response data and status code to the json_response wrapper to be serialized
         return response, 200
     
-    # General Exception
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
 
