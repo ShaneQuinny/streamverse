@@ -131,7 +131,7 @@ def update_user_details(username):
         if not update_fields:
             return {"message": "No valid fields to update"}, 400
         
-        # Get the current time for update metadate
+        # Get the current time for last updated at time
         now = datetime.now(timezone.utc).isoformat()
 
         # Add user updated at field for tracking change history 
@@ -153,6 +153,7 @@ def update_user_details(username):
             "message": f"User '{username}' updated successfully.",
             "changed_fields": changed_fields,
             "updated_at": now,
+            "updated_username": new_username
         }, 200
 
     except Exception as e:
@@ -238,10 +239,6 @@ def remove_user(username):
         if not user:
             return {"error": f"User '{username}' not found."}, 404
         
-        # Ensure user is set as inactive before deletion
-        if user.get("active", True):
-            return {"error": "User must be deactivated before deletion."}, 400
-        
         # Delete the user document and ensure all user was successfully deleted
         result = users.delete_one({"username": username})
         if result.deleted_count == 0:
@@ -251,7 +248,7 @@ def remove_user(username):
         log_admin_action(current_admin, "delete_user", username, {"action": f"User '{username}' permanently deleted."})
         
         # Return No Content status code to the json_response wrapper to be serialized
-        return 204
+        return {}, 204
     
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
@@ -286,7 +283,7 @@ def set_user_active_status(username, active, reason, current_admin):
         # Check if user exists
         user = users.find_one({"username": username})
         if not user:
-            return {"error": "User not found"}, 404
+            return {"error": f"User '{username}' not found."}, 404
 
         # Handle user active state
         if user.get("active", True) == active:

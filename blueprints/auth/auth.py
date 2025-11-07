@@ -5,6 +5,7 @@ from globals import SECRET_KEY, TOKEN_EXPIRY, users, blacklist
 from email_validator import validate_email, EmailNotValidError
 from decorators import jwt_required, json_response
 from utils.register_routes import register_blueprint_routes
+from utils.extract_bearer_header import extract_bearer_from_auth_header
 import bcrypt, jwt, uuid
 
 """
@@ -84,8 +85,8 @@ def login():
         data = request.get_json(silent=True) or {}
 
         # Get credentials
-        username = (data.get("username", "")).strip().lower()
-        password = (data.get("password", "")).strip()
+        username = (data.get("username") or "").strip().lower()
+        password = (data.get("password") or "").strip()
 
         # Validate required fields and collect missing ones
         missing = []
@@ -148,8 +149,8 @@ def login():
 # --- Logout ---
 def logout():
     try:
-        # Get access token from header
-        token = request.headers.get("Bearer")
+        # Get access token from auth header
+        token = extract_bearer_from_auth_header(request)
 
         # Decode token and get JTI and username to blacklist
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -180,11 +181,13 @@ def refresh_token():
         # Get refresh token from JSON data in the request body
         data = request.get_json()
         token = data.get("refresh_token")
+        if not token:
+            return {"error": "Please provided refresh token in body of rqeuest"}, 400
 
         # Decode token and ensure it is a refresh token
         decoded = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
         if decoded.get("type") != "refresh":
-            return {"message": "Invalid refresh token type"}, 401
+            return {"error": "Invalid refresh token type"}, 401
         
         # Check for blacklisted token by jti 
         if blacklist.find_one({"jti": decoded["jti"]}):

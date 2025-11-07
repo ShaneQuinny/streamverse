@@ -5,15 +5,14 @@ from functools import wraps
 from globals import SECRET_KEY, blacklist, users
 from datetime import datetime, timezone
 from utils.response import api_response
+from utils.extract_bearer_header import extract_bearer_from_auth_header
 
 # --- JWT Required Wrapper ---
 def jwt_required(func):
     @wraps(func)
     def wrapper(*args, **kwargs):
-        # Check for JWT in request headers
-        token = request.headers.get("Bearer")
-        if not token:
-            return api_response({"error": "Missing JWT token"}, 401)
+        # Get access token from auth header
+        token = extract_bearer_from_auth_header(request)
 
         try:
             # Decode the JWT
@@ -47,11 +46,10 @@ def jwt_required(func):
             if not user.get("active", True):
                 return api_response({"error": "Account is deactivated"}, 403)
 
-            # If everything is authenticated, attach user info to the request context
+            # If everything is authenticated, attach user info to the request
             request.user = user
             request.jwt_id = decoded["jti"]
 
-        # Exceptions
         except jwt.ExpiredSignatureError:
             return api_response({"error": "JWT token expired"}, 401)
         except jwt.InvalidIssuerError:
@@ -78,7 +76,6 @@ def admin_required(func):
 
             return func(*args, **kwargs)
         
-        # General Exception
         except Exception as e:
             return api_response({"error": f"Server error: {str(e)}"}, 500)
     return wrapper

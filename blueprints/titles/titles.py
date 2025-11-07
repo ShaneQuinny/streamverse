@@ -9,6 +9,15 @@ from globals import titles
 from bson import ObjectId
 import math
 
+"""
+This blueprint manages all operations related to streaming titles within the StreamVerse API.
+It provides endpoints for creating, retrieving, updating, and deleting titles, as well as 
+advanced query functionality including pagination, filtering, and sorting. Additional routes 
+offer more advanced insights such as rating averages, different genres, and top-reviewed titles.
+The blueprint also supports generating tailored recommendations for users based on whatever 
+the user wants to filter by.
+"""
+
 # --- Define Titles Blueprint ---
 titles_bp = Blueprint("titles_bp", __name__)
 
@@ -154,7 +163,7 @@ def edit_title(title_id):
         # Find existing title
         title = titles.find_one({"_id": ObjectId(title_id)})
         if not title:
-            return {"error": "Title not found"}, 404
+            return {"error": "No title found with that ID"}, 404
         
         # Validate required fields to be updated
         required_fields = ["type", "title", "cast", "release_year", "rating", "genres", 
@@ -334,7 +343,7 @@ def get_tailored_recommendations(title_id):
         # Fetch the title to build tailored recommendations
         title = titles.find_one({"_id": ObjectId(title_id)})
         if not title:
-            return {"error": "Title not found"}, 404
+            return {"error": "No title found with that ID"}, 404
 
         # Get recommendation stats
         genres = title.get("genres", [])
@@ -382,59 +391,64 @@ def get_tailored_recommendations(title_id):
     
 # --- Helper: Get filtering options and construct the query
 def construct_filtered_query(request):
-    # Get filters from request arguments
-    type_filter = request.args.get("type", "all").lower()
-    cast_filter = request.args.get("cast", "all").lower()
-    release_year_filter = request.args.get("release_year", "all").lower()
-    rating_filter = request.args.get("rating", "all").lower()
-    genre_filter = request.args.get("genre", "all").lower()
-    director_filter = request.args.get("director", "all").lower()
-    country_filter = request.args.get("country", "all").lower()
-    duration_filter = request.args.get("duration", "all").lower()
-    available_on_filter = request.args.get("available_on", "all").lower()
-    imdb_rating_filter = request.args.get("imdb_rating", "all").lower()
-    rotten_tomatoes_score_filter = request.args.get("rotten_tomatoes_score", "all").lower()
-    language_filter = request.args.get("languages", "all").lower()
-    subtitles_available_filter = request.args.get("subtitles_available", "all").lower()
+    # Extract filters
+    type_filter = request.args.get("type", "all")
+    cast_filter = request.args.get("cast", "all")
+    release_year_filter = request.args.get("release_year", "all")
+    rating_filter = request.args.get("rating", "all")
+    genre_filter = request.args.get("genre", "all")
+    director_filter = request.args.get("director", "all")
+    country_filter = request.args.get("country", "all")
+    duration_filter = request.args.get("duration", "all")
+    available_on_filter = request.args.get("available_on", "all")
+    imdb_rating_filter = request.args.get("imdb_rating", "all")
+    rotten_tomatoes_score_filter = request.args.get("rotten_tomatoes_score", "all")
+    language_filter = request.args.get("languages", "all")
+    subtitles_available_filter = request.args.get("subtitles_available", "all")
 
-    # Instantiate query
+    # Build query
     query = {}
 
-    # Apply filters
-    if type_filter != "all":
+    if type_filter.lower() != "all":
         query["type"] = type_filter
-    if cast_filter != "all":
-        query["cast"] = cast_filter
-    if release_year_filter != "all":
-        query["release_year"] = int(release_year_filter)
-    if rating_filter != "all":
-        query["rating"] = rating_filter.upper() 
-    if genre_filter != "all":
-        query["genres"] = genre_filter
-    if director_filter != "all":
-        query["directors"] = director_filter
-    if country_filter != "all":
-        query["countries"] = country_filter
-    if duration_filter != "all":
+    if rating_filter.lower() != "all":
+        query["rating"] = rating_filter.upper()
+    if cast_filter.lower() != "all":
+        query["cast"] = {"$in": [cast_filter]}
+    if genre_filter.lower() != "all":
+        query["genres"] = {"$in": [genre_filter]}
+    if director_filter.lower() != "all":
+        query["directors"] = {"$in": [director_filter]}
+    if country_filter.lower() != "all":
+        query["countries"] = {"$in": [country_filter]}
+    if language_filter.lower() != "all":
+        query["languages"] = {"$in": [language_filter]}
+    if subtitles_available_filter.lower() != "all":
+        query["subtitles_available"] = {"$in": [subtitles_available_filter]}
+    if available_on_filter.lower() != "all":
+        query["available_on"] = {"$elemMatch": {"platform": available_on_filter}}
+    if release_year_filter.lower() != "all":
+        if release_year_filter.startswith(">"):
+            query["release_year"] = {"$gt": int(release_year_filter[1:])}
+        elif release_year_filter.startswith("<"):
+            query["release_year"] = {"$lt": int(release_year_filter[1:])}
+        else:
+            query["release_year"] = int(release_year_filter)
+    if duration_filter.lower() != "all":
         if duration_filter.startswith(">"):
             query["duration_in_mins"] = {"$gt": int(duration_filter[1:])}
         elif duration_filter.startswith("<"):
             query["duration_in_mins"] = {"$lt": int(duration_filter[1:])}
         else:
             query["duration_in_mins"] = int(duration_filter)
-    if available_on_filter != "all":
-        query["available_on.platform"] = available_on_filter
-    if imdb_rating_filter != "all":
+    if imdb_rating_filter.lower() != "all":
         query["imdb_rating"] = {"$gte": float(imdb_rating_filter)}
-    if rotten_tomatoes_score_filter != "all":
+    if rotten_tomatoes_score_filter.lower() != "all":
         query["rotten_tomatoes_score"] = {"$gte": float(rotten_tomatoes_score_filter)}
-    if language_filter != "all":
-        query["languages"] = language_filter
-    if subtitles_available_filter != "all":
-        query["subtitles_available"] = subtitles_available_filter
 
     # Return constructed query
     return query
+
     
 # --- Route Definitions ---
 titles_routes = [

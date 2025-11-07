@@ -8,6 +8,14 @@ from utils.audit import log_admin_action
 from utils.validation import validate_object_id
 from datetime import datetime, timezone
 
+"""
+This blueprint manages all operations related to title reviews within the StreamVerse API.
+It allows authenticated users to create, edit, and view reviews for individual titles,
+while providing admins with the ability to delete reviews.
+Endpoints include functionality for retrieving all reviews for a title, fetching a single review,
+adding new user reviews, updating existing ones, and removing inappropriate or outdated reviews.
+"""
+
 # Define Titles Blueprint and Service
 reviews_bp = Blueprint("reviews_bp", __name__)
 
@@ -70,7 +78,7 @@ def fetch_one_review(title_id, review_id):
         if not titleReview:
             return {"error": "No review found with ID"}, 404
         
-        # Serialize review ID and return data and status code back to blueprint
+        # Serialize review ID and return raw response and status code to be serialized by json_response wrapper
         review = titleReview["reviews"][0]
         review["_id"] = str(review["_id"])
         return review, 200
@@ -111,10 +119,10 @@ def add_new_review(title_id):
         if result.matched_count == 0:
             return {"error": "Review could not be added. Contact an admin for further investigation."}, 500
         
-        # Return the data and the status code back to the blueprint
+        # Return raw response and status code to be serialized by json_response wrapper
         return {
             "message": "Review added",
-            "created_review_id": str(new_review["_id"])
+            "id": str(new_review["_id"])
         }, 201
         
     # General Exception
@@ -168,10 +176,10 @@ def edit_review(title_id, review_id):
         if result.matched_count == 0:
             return {"error": "Review could not be updated. Contact an admin for further investigation."}, 500
         
-        # Return the data and the status code back to the blueprint
+        # Return raw response and status code to be serialized by json_response wrapper
         return {
             "message": f"Review updated for title '{title["title"]}'",
-            "updated_review_id": review_id
+            "id": review_id
         }, 200
         
     except Exception as e:
@@ -202,11 +210,11 @@ def delete_review(title_id, review_id):
             return {"error": "No review found with ID"}, 404
         
         # Remove the review from the title and ensure that the review was successfully deleted
-        result = titles.update_one({"_id": ObjectId(review_id)},{"$pull": {"reviews": {"_id": ObjectId(review_id)}}})
+        result = titles.update_one({"_id": ObjectId(title_id)},{"$pull": {"reviews": {"_id": ObjectId(review_id)}}})
         if result.modified_count == 0:
             return {"error": "Review could not be deleted. Investigate database collection for further information."}, 500
         
-        # Log delete action for auditing purposes and return data back to blueprint 
+        # Log delete action for auditing purposes and return raw response and status code to be serialized by json_response wrapper
         log_admin_action(current_admin, "delete_review", review_id,
             {"action": f"deleted review '{review_id}' ID for title '{title["title"]}'"})            
         return {}, 204

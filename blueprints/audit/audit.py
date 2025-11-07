@@ -132,9 +132,10 @@ def prune_audit_logs():
 
         # Calculate the cutoff date
         cutoff = datetime.now(timezone.utc) - timedelta(days=days)
+        cutoff_iso_format = cutoff.isoformat()
     
         # Delete old audit records from the collection
-        result = audit_logs.delete_many({"timestamp": {"$lt": cutoff}})
+        result = audit_logs.delete_many({"timestamp": {"$lt": cutoff_iso_format}})
         if result.deleted_count == 0:
             return {"error": "Deletion failed unexpectedly. Investage database collection for further information."}, 500
     
