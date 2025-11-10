@@ -27,53 +27,48 @@ jti: Unique JWT Identifier
 Access tokens expire after 30 minutes, while refresh tokens remain valid for 7 days.
 
 Core Features
-Modular Blueprint Architecture: Each functional area (Auth, Titles, Reviews, Users, Audit, Health) is encapsulated for maintainability.
-Role-based Authorization: Distinct control for Admins and Registered Users.
-MongoDB Aggregations: Used for analytics endpoints like stats/ratings and stats/genres.
-Audit Logging: Every admin action (e.g., delete, update, deactivate) is logged automatically for auditing purpose.
-Comprehensive Validation: Input validation for ObjectIds, JSON payloads, and field constraints.
-Pagination, Filtering & Sorting: Available across all list-based endpoints for scalability.
-Error Handling: Unified, descriptive error messages and status codes for consistent client interaction.
+- Modular Blueprint Architecture: Each functional area (Auth, Titles, Reviews, Users, Audit, Health) is encapsulated for maintainability.
+- Role-based Authorization: Distinct control for Admins and Registered Users.
+- MongoDB Aggregations: Used for analytics endpoints like stats/ratings and stats/genres.
+- Audit Logging: Every admin action (e.g., delete, update, deactivate) is logged automatically for auditing purpose.
+- Comprehensive Validation: Input validation for ObjectIds, JSON payloads, and field constraints.
+- Pagination, Filtering & Sorting: Available across all list-based endpoints for scalability.
+- Error Handling: Unified, descriptive error messages and status codes for consistent client interaction.
 
 Folder Breakdown
 
-Authentication
+- Authentication
 Handles user registration, login, logout, and token refresh.
 Everyone / Registered User / Admin
-
-User Management (Admin Only)
+- User Management (Admin Only)
 Admin-exclusive controls for viewing, updating, activating/deactivating, and deleting users.
 Admin
-
-Titles
+- Titles
 Main dataset endpoints for CRUD operations, stats, and recommendations.
 Everyone / Registered User / Admin
-
-Reviews
+- Reviews
 Manages user-generated reviews for each title, with restricted admin deletion.
 Everyone / Registered User / Admin
-
-Audit
+- Audit
 Tracks and analyzes all admin activity within the API (view, filter, prune).
 Admin
-
-HealthCheck
+- HealthCheck
 Monitors API uptime, version, and database connection.
 Everyone
 
 Example Usage Flow
-Register a new user via POST /auth/register.
-Login to obtain both access and refresh tokens.
-Use the Bearer: JWT access_token header to:
-Browse titles and reviews.
-Create or update reviews.
-Retrieve recommendations.
+1. Register a new user via POST /auth/register.
+2. Login to obtain both access and refresh tokens.
+3. Use the Bearer: JWT access_token header to:
+4. Browse titles and reviews.
+5. Create or update reviews.
+6. Retrieve recommendations.
 
 Admins can:
-Manage users (/users endpoints).
-View or prune audit logs.
-Remove inappropriate content.
-Monitor system health at /health to confirm uptime and database connectivity.
+1. Manage users (/users endpoints).
+2. View or prune audit logs.
+3. Remove inappropriate content.
+4. Monitor system health at /health to confirm uptime and database connectivity.
 
 Developer Notes
 All timestamps are returned in UTC ISO 8601 format.
