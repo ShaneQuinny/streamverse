@@ -4,14 +4,12 @@ It implements secure JWT-based authentication, supports role-based access contro
 
 Purpose
 StreamVerse allows users to:
-Browse and filter a collection of movies and shows
-Submit and manage reviews
-Retrieve tailored recommendations
-Track platform availability (Netflix, Prime, etc.)
-Support administrative features for full dataset control
-
+- Browse and filter a collection of movies and shows
+- Submit and manage reviews
+- Retrieve tailored recommendations
+- Track platform availability (Netflix, Prime, etc.)
+- Support administrative features for full dataset control
 It is designed as a high-functionality API, demonstrating complex data operations, secure design, and API scalability.
-
 
 Authentication
 StreamVerse uses a JWT + API key dual-layer security model for all protected endpoints.
@@ -28,7 +26,6 @@ jti: Unique JWT Identifier
 
 Access tokens expire after 30 minutes, while refresh tokens remain valid for 7 days.
 
-
 Core Features
 Modular Blueprint Architecture: Each functional area (Auth, Titles, Reviews, Users, Audit, Health) is encapsulated for maintainability.
 Role-based Authorization: Distinct control for Admins and Registered Users.
@@ -37,7 +34,6 @@ Audit Logging: Every admin action (e.g., delete, update, deactivate) is logged a
 Comprehensive Validation: Input validation for ObjectIds, JSON payloads, and field constraints.
 Pagination, Filtering & Sorting: Available across all list-based endpoints for scalability.
 Error Handling: Unified, descriptive error messages and status codes for consistent client interaction.
-
 
 Folder Breakdown
 
@@ -65,50 +61,7 @@ HealthCheck
 Monitors API uptime, version, and database connection.
 Everyone
 
-🧭 Base URL
-All requests use the following base url variable:
-
-Plain Text
-{{baseUrl}}
-
-Example:
-{{baseUrl}}/api/v1.0/titles
-
-Status Code Overview
-CodeMeaning
-
-200
-Request successful
-
-201
-Resource created successfully
-
-204
-No content (successful deletion)
-
-400
-Bad request (missing or invalid data)
-
-401
-Unauthorized (missing or invalid token)
-
-403
-Forbidden (insufficient permissions)
-
-404
-Resource not found
-
-409
-Conflict (duplicate or invalid operation)
-
-500
-Internal server error
-
-503
-Service unavailable (database or system issue)
-
-
-🧠 Example Usage Flow
+Example Usage Flow
 Register a new user via POST /auth/register.
 Login to obtain both access and refresh tokens.
 Use the Bearer: JWT access_token header to:
@@ -120,7 +73,6 @@ Admins can:
 Manage users (/users endpoints).
 View or prune audit logs.
 Remove inappropriate content.
-
 Monitor system health at /health to confirm uptime and database connectivity.
 
 Developer Notes
