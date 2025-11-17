@@ -205,11 +205,7 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
-/.vs/StreamVerse-Git/CopilotIndices/17.14.1231.31060
-/.vs/StreamVerse-Git/FileContentIndex
-/.vs/StreamVerse-Git/v17/TestStore/0
-/.vs/slnx.sqlite
-/.vs/slnx.sqlite-journal
-/.vs/StreamVerse-Git/v17/.wsuo
-/.vs/StreamVerse-Git/v17/DocumentLayout.json
-/.vs/VSWorkspaceState.json
+backend/.vs/
+backend/.vscode/
+frontend/.vs/
+frontend/.vscode/
