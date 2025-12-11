@@ -300,7 +300,7 @@
       <!-- Recommendations -->
       @if (!isEditingTitle) {
         <div class="section mb-4">
-          <h3><i class="bi bi-stars"></i> Because you watched {{ title.title }}</h3>
+          <h3><i class="bi bi-stars"></i> Recommendations based on "{{ title.title }}"</h3>
           
           @if (recommendationsLoading) {
             <p class="text-white-50">Loading recommendations...</p>

@@ -5,13 +5,15 @@
 import { catchError } from 'rxjs/operators';
 import { throwError } from 'rxjs';
 
+// Streamverse API base URL 
 const API_BASE = 'http://localhost:5000/api/v1.0';
 
+// Auth Token Consts 
 const ACCESS_KEY = 'access_token';
 const EXP_KEY = 'expiration';
 const SESSION_EXPIRED_KEY = 'session_expired';
 
-// Guided from https://angular.dev/guide/http/interceptors
+// Implemented/derived from https://angular.dev/guide/http/interceptors
 export const jwtInterceptor: HttpInterceptorFn = (request, next) => {
   const accessToken = localStorage.getItem(ACCESS_KEY);
 
@@ -22,6 +24,7 @@ export const jwtInterceptor: HttpInterceptorFn = (request, next) => {
     return next(request);
   }
 
+  // Set Bearer header to access the restricted parts of Streamverse 
   const authReq = request.clone({
     setHeaders: {
       Authorization: `Bearer ${accessToken}`,

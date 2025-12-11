@@ -161,7 +161,7 @@ export class User {
         },
         error: (err) => {
           this.errorMessage =
-            err?.error?.errors?.error || err?.error?.message || 'Failed to reset password.';
+            err?.error?.errors?.message || 'Failed to reset password.';
           this.isPasswordUpdating = false;
         },
       });
