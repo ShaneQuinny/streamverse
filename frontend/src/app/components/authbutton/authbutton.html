@@ -1,27 +1,3 @@
-<!-- SESSION EXPIRED BANNER -->
-<div
-  *ngIf="hasExpiredSession"
-  class="alert alert-warning d-flex align-items-center justify-content-between mb-2 auth-session-alert"
->
-  <div>
-    <strong>Session expired.</strong>
-    Please refresh your session to continue using StreamVerse.
-  </div>
-  <div>
-    <button
-      class="btn btn-sm btn-outline-dark me-2"
-      (click)="onRefreshSession()"
-      [disabled]="isRefreshing">
-        {{ isRefreshing ? 'Refreshing…' : 'Refresh Session' }}
-    </button>
-    <button
-      class="btn btn-sm btn-link text-decoration-none"
-      (click)="dismissSessionWarning()">
-        Dismiss
-    </button>
-  </div>
-</div>
-
 <!-- MAIN AUTH BUTTON -->
 <button class="btn btn-yellow" (click)="onPrimaryClick()">
   {{ isLoggedIn ? 'Log out' : 'Log in' }}

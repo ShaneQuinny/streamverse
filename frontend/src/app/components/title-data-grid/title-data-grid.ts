@@ -3,14 +3,14 @@ import { CommonModule } from '@angular/common';
 import { WebService } from '../../services/web/web-service';
 import { AgGridAngular } from 'ag-grid-angular';
 import { ColDef } from 'ag-grid-community';
-import { AllCommunityModule, ModuleRegistry, provideGlobalGridOptions } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry, GridReadyEvent, provideGlobalGridOptions } from 'ag-grid-community';
+import { Router } from '@angular/router';
 
 ModuleRegistry.registerModules([AllCommunityModule]);
 provideGlobalGridOptions({ theme: 'legacy' });
 
 @Component({
   selector: 'app-title-data-grid',
-  standalone: true,
   imports: [CommonModule, AgGridAngular],
   providers: [WebService],
   templateUrl: './title-data-grid.html',
@@ -34,7 +34,8 @@ export class TitleDataGrid {
     { headerName: 'Languages', filter: true, valueGetter: (params) => (params.data?.languages || []).join(', ') },
     { headerName: 'Subtitles', filter: true, valueGetter: (params) => (params.data?.subtitles_available || []).join(', ') },
     { headerName: 'Platforms', filter: true, valueGetter: (params) => { const platforms = params.data?.available_on || [];
-       return platforms.map((p: any) => p.platform).join(', '); } }
+       return platforms.map((p: any) => p.platform).join(', '); } },
+    { headerName: 'Actions', field: 'actions', cellRenderer: () => '<button class="btn btn-sm btn-outline-dark">View Title</button>' },
   ];
 
   // Grid data
@@ -45,7 +46,10 @@ export class TitleDataGrid {
   paginationPageSize = 10;
   paginationPageSizeSelector = [10, 25, 50, 100];
 
-  constructor(private webService: WebService) {}
+  constructor(
+    private webService: WebService,
+    private router: Router  
+  ) {}
 
   ngOnInit() {
     this.webService.getAllTitles().subscribe({
@@ -56,5 +60,21 @@ export class TitleDataGrid {
         console.error('Failed to load titles for data grid', err);
       },
     });
+  }
+
+  onGridReady(_event: GridReadyEvent): void { }
+
+  // Handle clicks on the "View Audit Log" button
+  onCellClicked(event: any): void {
+    if (event.colDef.field === 'actions') {
+      const id = event.data?._id;
+      if (id) {
+        this.onViewTitle(id);
+      }
+    }
+  }
+
+  onViewTitle(id: string): void {
+    this.router.navigate(['/titles', id]);
   }
 }

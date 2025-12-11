@@ -1,6 +1,6 @@
 import { Component, OnDestroy } from '@angular/core';
-import { ActivatedRoute } from '@angular/router';
-import { FormBuilder, FormGroup, Validators } from '@angular/forms';
+import { ActivatedRoute, Router } from '@angular/router';
+import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -24,6 +24,7 @@ export class Title implements OnDestroy {
   title!: TitleModel;
   reviews$!: Observable<Review[]>;
   reviewForm!: FormGroup;
+  titleEditForm!: FormGroup;
   currentUsername: string | null = null;
   isAdmin = false;
   isLoading = false;
@@ -32,8 +33,9 @@ export class Title implements OnDestroy {
   recommendedTitles: any[] = [];
   recommendationsLoading = false;
   recommendationsError = '';
+  isEditingTitle = false;
+  isSavingTitle = false;
   
-  // Add subscription to track auth state changes
   private authSubscription?: Subscription;
 
   constructor(
@@ -41,7 +43,8 @@ export class Title implements OnDestroy {
     private formBuilder: FormBuilder,
     private webService: WebService,
     private authService: AuthService,
-    private cacheService: CacheService
+    private cacheService: CacheService,
+    private router: Router
   ) {}
   
   ngOnInit(): void {
@@ -50,22 +53,17 @@ export class Title implements OnDestroy {
       this.loadTitleAndReviews(id)
     }
 
-    // Subscribe to auth state changes
     this.authSubscription = this.authService.auth$.subscribe((authState) => {
       this.currentUsername = authState.username;
       this.isAdmin = authState.isAdmin;
       
-      // Update form if it exists
       if (this.reviewForm) {
-        this.reviewForm.patchValue({
-          username: this.currentUsername
-        });
+        this.reviewForm.patchValue({ username: this.currentUsername });
       }
     });
   }
 
   ngOnDestroy(): void {
-    // Clean up subscription to prevent memory leaks
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
@@ -75,17 +73,13 @@ export class Title implements OnDestroy {
     this.isLoading = true;
     this.errorMessage = '';
 
-    // Get the username from current auth state
     this.currentUsername = this.authService.currentUsername;
-
-    // Reviews observable for async pipe
     this.reviews$ = this.webService.getReviewsForTitle(id);
 
     this.webService.getTitleById(id).subscribe({
       next: (title) => {
         this.title = title;
 
-        // Check cache first, then fetch if needed
         if (!this.cacheService.has(title._id)) {
           this.webService.getMoviePoster(title.title, title.release_year).subscribe({
             next: (response: any) => {
@@ -98,7 +92,6 @@ export class Title implements OnDestroy {
           });
         }
         
-        // Initialize form
         if (!this.reviewForm) {
           this.reviewForm = this.formBuilder.group({
             username: [{ value: this.currentUsername, disabled: true }],
@@ -106,6 +99,9 @@ export class Title implements OnDestroy {
             rating: [5, [Validators.required, Validators.min(1), Validators.max(5)]],
           });
         }
+
+        // Initialize title edit form
+        this.initializeTitleEditForm();
         
         this.isLoading = false;
         this.loadRecommendations(this.title._id);
@@ -114,6 +110,149 @@ export class Title implements OnDestroy {
         console.error('Error fetching title', err);
         this.errorMessage = 'Something went wrong loading this title.';
         this.isLoading = false;
+      }
+    });
+  }
+
+  private initializeTitleEditForm(): void {
+    this.titleEditForm = this.formBuilder.group({
+      title: [this.title.title, Validators.required],
+      type: [this.title.type, Validators.required],
+      release_year: [this.title.release_year, [Validators.required, Validators.min(1800), Validators.max(new Date().getFullYear() + 5)]],
+      duration_in_mins: [this.title.duration_in_mins, [Validators.required, Validators.min(1)]],
+      rating: [this.title.rating, Validators.required],
+      description: [this.title.description, Validators.required],
+      imdb_rating: [this.title.imdb_rating, [Validators.required, Validators.min(0), Validators.max(10)]],
+      rotten_tomatoes_score: [this.title.rotten_tomatoes_score, [Validators.required, Validators.min(0), Validators.max(100)]],
+      cast: this.formBuilder.array(
+        this.title.cast.map(actor => this.formBuilder.control(actor))
+      ),
+      directors: this.formBuilder.array(
+        this.title.directors.map(d => this.formBuilder.control(d))
+      ),
+      languages: this.formBuilder.array(
+        this.title.languages.map(l => this.formBuilder.control(l))
+      ),
+      genres: this.formBuilder.array(
+        this.title.genres.map(genre => this.formBuilder.control(genre, Validators.minLength(1)))
+      ),
+      available_on: this.formBuilder.array(
+        this.title.available_on.map(platform => 
+          this.formBuilder.group({
+            platform: [platform.platform],
+            url: [platform.url]
+          })
+        )
+      )
+    });
+  }
+
+  get genres(): FormArray {
+    return this.titleEditForm.get('genres') as FormArray;
+  }
+
+  get availableOn(): FormArray {
+    return this.titleEditForm.get('available_on') as FormArray;
+  }
+
+  get cast(): FormArray {
+    return this.titleEditForm.get('cast') as FormArray;
+  }
+
+  get directors(): FormArray {
+    return this.titleEditForm.get('directors') as FormArray;
+  }
+
+  get languages(): FormArray {
+    return this.titleEditForm.get('languages') as FormArray;
+  }
+
+  addGenre(): void {
+    this.genres.push(this.formBuilder.control('', Validators.required));
+  }
+
+  removeGenre(index: number): void {
+    this.genres.removeAt(index);
+  }
+
+  addPlatform(): void {
+    this.availableOn.push(
+      this.formBuilder.group({
+        platform: ['', Validators.required],
+        url: ['', Validators.required]
+      })
+    );
+  }
+
+  removePlatform(index: number): void {
+    this.availableOn.removeAt(index);
+  }
+
+  addCast(): void {
+    this.cast.push(this.formBuilder.control(''));
+  } 
+
+  removeCast(index: number): void {
+    this.cast.removeAt(index);
+  }
+
+  addDirector(): void {
+    this.directors.push(this.formBuilder.control(''));
+  }
+
+  removeDirector(index: number): void {
+    this.directors.removeAt(index);
+  }
+
+  addLanguage(): void {
+    this.languages.push(this.formBuilder.control(''));
+  }
+
+  removeLanguage(index: number): void {
+    this.languages.removeAt(index);
+  }
+
+  toggleEditMode(): void {
+    if (this.isEditingTitle) {
+      // Cancel editing - reset form to original values
+      this.initializeTitleEditForm();
+    }
+    this.isEditingTitle = !this.isEditingTitle;
+    
+    if (this.isEditingTitle) {
+      // Scroll to top when entering edit mode
+      setTimeout(() => {
+        document.querySelector('.info-box')?.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    }
+  }
+
+  onSaveTitleEdit(): void {
+    if (this.titleEditForm.invalid) {
+      this.titleEditForm.markAllAsTouched();
+      return;
+    }
+
+    this.isSavingTitle = true;
+    const formValue = this.titleEditForm.getRawValue();
+
+    this.webService.updateTitle(this.title._id, formValue).subscribe({
+      next: () => {
+        // Reload the title to get updated data
+        this.webService.getTitleById(this.title._id).subscribe({
+          next: (updatedTitle) => {
+            this.title = updatedTitle;
+            this.isEditingTitle = false;
+            this.isSavingTitle = false;
+            this.initializeTitleEditForm();
+            alert('Title updated successfully!');
+          }
+        });
+      },
+      error: (err) => {
+        console.error('Error updating title', err);
+        this.isSavingTitle = false;
+        alert('Failed to update title. Please try again.');
       }
     });
   }
@@ -129,9 +268,7 @@ export class Title implements OnDestroy {
 
     this.webService.getTailoredRecommendations(titleId).subscribe({
       next: (response: any) => {
-        // APIResponse data from backend get_tailored_recommendations
         this.recommendedTitles = response.data.tailored_recommendations || [];
-        console.log(this.recommendedTitles)
         this.recommendationsLoading = false;
       },
       error: (err) => {
@@ -142,16 +279,23 @@ export class Title implements OnDestroy {
     });
   }
 
+  navigateToTitle(titleId: string): void {
+    if (!titleId) return;
+    
+    this.router.navigate(['/titles', titleId]).then(() => {
+      this.loadTitleAndReviews(titleId);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    });
+  }
+
   onSubmitReview(): void {
     if (!this.title || this.reviewForm.invalid) return;
 
     const { comment, rating } = this.reviewForm.getRawValue();
 
     if (this.editingReviewId) {
-      // Edit existing review
       this.webService.updateReview(this.title._id, this.editingReviewId, comment, rating).subscribe({
         next: () => {
-          // refresh reviews
           this.reviews$ = this.webService.getReviewsForTitle(this.title._id);
           this.reviewForm.reset({
             username: this.currentUsername,
@@ -164,14 +308,11 @@ export class Title implements OnDestroy {
           console.error('Error updating review', err);
         }
       });
-      // Scroll to form
       document.querySelector('.review-card')?.scrollIntoView({ behavior: 'smooth' });
       
     } else {
-      // Add new review
       this.webService.postReview(this.title._id, comment, rating).subscribe({
         next: () => {
-          // refresh reviews
           this.reviews$ = this.webService.getReviewsForTitle(this.title._id);
           this.reviewForm.reset({
             username: this.currentUsername,
@@ -183,8 +324,6 @@ export class Title implements OnDestroy {
           console.error('Error posting review', err);
         }
       });
-      // Scroll to form
-      document.querySelector('.review-card')?.scrollIntoView({ behavior: 'smooth' });
     }
   }
 
@@ -194,8 +333,6 @@ export class Title implements OnDestroy {
       comment: review.comment,
       rating: review.rating
     });
-    // Scroll to form
-    document.querySelector('.reviews-container')?.scrollIntoView({ behavior: 'smooth' });
   }
 
   onDeleteReview(reviewId: string): void {
@@ -205,7 +342,6 @@ export class Title implements OnDestroy {
 
     this.webService.deleteReview(this.title._id, reviewId).subscribe({
       next: () => {
-        // refresh reviews
         this.reviews$ = this.webService.getReviewsForTitle(this.title._id);
       },
       error: (err) => {
@@ -223,7 +359,6 @@ export class Title implements OnDestroy {
     this.webService.deleteTitle(this.title._id).subscribe({
       next: () => {
         alert('Title deleted successfully');
-        // Navigate back to titles list
         window.location.href = '/titles';
       },
       error: (err) => {

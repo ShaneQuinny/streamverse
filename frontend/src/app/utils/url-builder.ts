@@ -1,4 +1,4 @@
-//
+// Utilily used to construct URLs for backend  
 export function buildUrl(
   base: string,
   path: string,
@@ -7,7 +7,7 @@ export function buildUrl(
     // Construct the base URL path
     const url = new URL(path, base);
 
-    // #TODO (Improve comment): If the URL requires parameters added, do so here
+    // If the URL requires parameters, query string, etc... added, we can add them here to be returned
     if (params) {
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null) {
@@ -15,6 +15,6 @@ export function buildUrl(
         }
       });
     }
-
+    
     return url.toString();
 }

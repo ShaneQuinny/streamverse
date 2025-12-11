@@ -3,23 +3,7 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WebService } from '../../services/web/web-service';
 import { AuthService } from '../../services/auth/auth-service';
-
-interface RatingStats {
-  avg_imdb_rating: number;
-  avg_rotten_tomatoes: number;
-  count: number;
-}
-
-interface GenreCount {
-  _id: string;   // genre name
-  count: number; // number of titles
-}
-
-interface TopReviewedTitle {
-  title: string;
-  _id: string; // Added for routing
-  review_count: number;
-}
+import { RatingStats, GenreCount, TopReviewedTitle } from '../../models/homestats';
 
 @Component({
   selector: 'app-home',
@@ -35,11 +19,12 @@ export class Home {
   topGenres: GenreCount[] = [];
   topReviewedTitles: TopReviewedTitle[] = [];
 
-  // Loading / error states
+  // Loading states
   isLoadingStats = false;
   isLoadingGenres = false;
   isLoadingTopReviewed = false;
 
+  // Error states
   statsError = '';
   genresError = '';
   topReviewedError = '';
@@ -55,30 +40,32 @@ export class Home {
     this.fetchTopReviewedTitles();
   }
 
+  // Check to see if the a user is logged in
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn;
   }
-
+  
+  // Get the current user (if logged in)
   get currentUser(): string | null {
     return this.authService.currentUsername;
   }
 
-  // --- API calls ---
+  // --- Fetch the rating stats from Streamverse API ---  
   fetchRatingStats(): void {
     this.isLoadingStats = true;
     this.statsError = '';
 
     this.webService.getRatingStats().subscribe({
-      next: (res: any) => {
+      next: (response: any) => {
         this.isLoadingStats = false;
 
-        if (!res?.success) {
+        if (!response?.success) {
           this.statsError =
-            res?.errors?.error || res?.errors?.message || 'Could not load stats.';
+            response?.errors?.error || response?.errors?.message || 'Could not load stats.';
           return;
         }
 
-        const list = res.data?.rating_stats;
+        const list = response.data?.rating_stats;
         if (Array.isArray(list) && list.length > 0) {
           const raw = list[0];
           this.ratingStats = {
@@ -92,32 +79,28 @@ export class Home {
       },
       error: (err) => {
         this.isLoadingStats = false;
-        this.statsError =
-          err?.error?.errors?.error ||
-          err?.error?.message ||
-          'Could not load stats.';
+        this.statsError = err?.error?.errors?.error || err?.error?.message || 'Could not load stats.';
       },
     });
   }
 
+  // --- Fetch the top generes from Streamverse API ---
   fetchTopGenres(): void {
     this.isLoadingGenres = true;
     this.genresError = '';
 
     // first page, top 8 genres, desc
     this.webService.getGenreCounts(1, 8, 'desc').subscribe({
-      next: (res: any) => {
+      next: (response: any) => {
         this.isLoadingGenres = false;
 
-        if (!res?.success) {
+        if (!response?.success) {
           this.genresError =
-            res?.errors?.error ||
-            res?.errors?.message ||
-            'Could not load genres.';
+            response?.errors?.error || response?.errors?.message || 'Could not load genres.';
           return;
         }
 
-        const list = res.data?.genre_count;
+        const list = response.data?.genre_count;
         if (Array.isArray(list)) {
           this.topGenres = list as GenreCount[];
         } else {
@@ -126,32 +109,28 @@ export class Home {
       },
       error: (err) => {
         this.isLoadingGenres = false;
-        this.genresError =
-          err?.error?.errors?.error ||
-          err?.error?.message ||
-          'Could not load genres.';
+        this.genresError = err?.error?.errors?.error || err?.error?.message || 'Could not load genres.';
       },
     });
   }
 
+  // --- Fetch the top reviewed titles from Streamverse API ---
   fetchTopReviewedTitles(): void {
     this.isLoadingTopReviewed = true;
     this.topReviewedError = '';
 
     // first page, top 5 titles, desc
     this.webService.getTopReviewedTitles(1, 5, 'desc').subscribe({
-      next: (res: any) => {
+      next: (response: any) => {
         this.isLoadingTopReviewed = false;
 
-        if (!res?.success) {
-          this.topReviewedError =
-            res?.errors?.error ||
-            res?.errors?.message ||
-            'Could not load top reviewed titles.';
+        if (!response?.success) {
+          this.topReviewedError = 
+            response?.errors?.error ||response?.errors?.message || 'Could not load top reviewed titles.';
           return;
         }
 
-        const list = res.data?.top_reviewed_titles;
+        const list = response.data?.top_reviewed_titles;
         if (Array.isArray(list)) {
           this.topReviewedTitles = list as TopReviewedTitle[];
         } else {
@@ -160,10 +139,7 @@ export class Home {
       },
       error: (err) => {
         this.isLoadingTopReviewed = false;
-        this.topReviewedError =
-          err?.error?.errors?.error ||
-          err?.error?.message ||
-          'Could not load top reviewed titles.';
+        this.topReviewedError = err?.error?.errors?.error || err?.error?.message || 'Could not load top reviewed titles.';
       },
     });
   }

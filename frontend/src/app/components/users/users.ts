@@ -21,12 +21,12 @@ export class Users {
   columnDefs: ColDef[] = [
     { field: 'username', headerName: 'Username', filter: true },
     { field: 'fullname', headerName: 'Full Name', filter: true },
-    { field: 'email', headerName: 'Email', filter: true },
+    { field: 'email', headerName: 'Email', filter: true, width: 350 },
     { headerName: 'Role', filter: true, valueGetter: (params) => (params.data?.admin ? 'Admin' : 'User') },
     { field: 'active', headerName: 'Status', filter: true, valueFormatter: (params) => (params.value ? 'Active' : 'Inactive') },
-    { field: 'created_at', headerName: 'Created At', filter: true },
-    { field: 'last_updated_at', headerName: 'Last Updated', filter: true },
-    { headerName: 'Actions', field: 'actions', sortable: false, filter: false, cellRenderer: () => '<button class="btn btn-sm btn-outline-dark">View User</button>' },
+    { field: 'created_at', headerName: 'Created At', filter: true, width: 350},
+    { field: 'last_updated_at', headerName: 'Last Updated', filter: true, width: 350 },
+    { headerName: 'Actions', field: 'actions', cellRenderer: () => '<button class="btn btn-sm btn-outline-dark">View User</button>' },
   ];
 
   // Grid data
@@ -57,8 +57,8 @@ export class Users {
     this.errorMessage = '';
 
     this.webService.getUsers().subscribe({
-      next: (resp: any) => {
-        this.rowData = resp?.data || [];
+      next: (response: any) => {
+        this.rowData = response?.data || [];
         this.loading = false;
       },
       error: (err) => {
@@ -80,7 +80,6 @@ export class Users {
     }
   }
 
-  // Stub for future details component / modal
   onViewUser(username: string): void {
     this.router.navigate(['/admin/users', username]);
   }

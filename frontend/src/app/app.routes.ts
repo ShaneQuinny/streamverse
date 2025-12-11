@@ -5,6 +5,8 @@ import { Titles } from './components/titles/titles';
 import { TitleDataGrid } from './components/title-data-grid/title-data-grid';
 import { Users } from './components/users/users';
 import { User } from './components/user/user';
+import { Audit } from './components/audit/audit';
+import { AuditRecord } from './components/auditrecord/auditrecord';
 
 export const routes: Routes = [
   {
@@ -30,5 +32,13 @@ export const routes: Routes = [
   {
     path: 'admin/users/:username',
     component: User
+  },
+  {
+    path: 'admin/audit',
+    component: Audit
+  },
+  {
+    path: 'admin/audit/:id',
+    component: AuditRecord
   }
 ];

@@ -1,0 +1,60 @@
+<div class="audit-details container py-4">
+  <a routerLink="/admin/audit" class="btn btn-sm btn-outline-dark mb-3">
+    Back to Audit Logs
+  </a>
+
+  <div class="card audit-card">
+    <div class="card-header d-flex justify-content-between align-items-center">
+      <h5 class="mb-0">
+        Audit Log ID
+        <span *ngIf="auditLog">#{{ auditLog._id }}</span>
+      </h5>
+
+      <span class="badge bg-secondary text-uppercase">
+        {{ auditLog?.action || 'Unknown Action' }}
+      </span>
+    </div>
+
+    <div class="card-body">
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="text-muted mb-2">
+        Loading audit log…
+      </div>
+
+      <!-- Error -->
+      <div *ngIf="errorMessage" class="alert alert-danger">
+        {{ errorMessage }}
+      </div>
+
+      <!-- Details -->
+      <ng-container *ngIf="!isLoading && auditLog">
+        <dl class="row mb-0">
+          <dt class="col-sm-3">Admin</dt>
+          <dd class="col-sm-9">
+            {{ auditLog.admin || '—' }}
+          </dd>
+
+          <dt class="col-sm-3">Target User</dt>
+          <dd class="col-sm-9">
+            {{ auditLog.target_user || '—' }}
+          </dd>
+
+          <dt class="col-sm-3">Action</dt>
+          <dd class="col-sm-9">
+            {{ auditLog.action || '—' }}
+          </dd>
+
+          <dt class="col-sm-3">Reason</dt>
+          <dd class="col-sm-9">
+            {{ auditLog.details?.reason || '—' }}
+          </dd>
+
+          <dt class="col-sm-3">Timestamp</dt>
+          <dd class="col-sm-9">
+            {{ formattedTimestamp || auditLog.timestamp }}
+          </dd>
+        </dl>
+      </ng-container>
+    </div>
+  </div>
+</div>

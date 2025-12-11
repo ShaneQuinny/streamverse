@@ -135,7 +135,9 @@ export class User {
 
   // --- Reset password ---
   onResetPassword(): void {
-    if (this.passwordForm.invalid) {
+    console.log('onResetPassword called', this.passwordForm.value);
+
+        if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
     }

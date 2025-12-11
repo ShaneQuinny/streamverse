@@ -1,4 +1,4 @@
-import {
+ import {
   HttpInterceptorFn,
   HttpErrorResponse,
 } from '@angular/common/http';
@@ -11,17 +11,18 @@ const ACCESS_KEY = 'access_token';
 const EXP_KEY = 'expiration';
 const SESSION_EXPIRED_KEY = 'session_expired';
 
-export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
+// Guided from https://angular.dev/guide/http/interceptors
+export const jwtInterceptor: HttpInterceptorFn = (request, next) => {
   const accessToken = localStorage.getItem(ACCESS_KEY);
 
-  const isApiRequest = req.url.startsWith(API_BASE);
-  const isLoginRequest = req.url.endsWith('/auth/login');
+  const isApiRequest = request.url.startsWith(API_BASE);
+  const isLoginRequest = request.url.endsWith('/auth/login');
 
   if (!isApiRequest || isLoginRequest || !accessToken) {
-    return next(req);
+    return next(request);
   }
 
-  const authReq = req.clone({
+  const authReq = request.clone({
     setHeaders: {
       Authorization: `Bearer ${accessToken}`,
     },

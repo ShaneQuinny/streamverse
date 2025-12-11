@@ -245,4 +245,58 @@ export class WebService {
     return this.http.delete(url);
   }
 
+  getAllAuditLogs(){
+    const url = buildUrl(this.BASE_URL, `audit/all`);
+    return this.http.get(url);
+  }
+
+  //
+  getAuditLogs(
+    page: number = 1,
+    pageSize: number = 10,
+    admin: string = 'all',
+    action: string = 'all',
+    sortBy: string = 'timestamp',
+    sortOrder: 'asc' | 'desc' = 'desc'
+  ) {
+    const params = {
+      pn: page,
+      ps: pageSize,
+      admin,
+      action,
+      sort_by: sortBy,
+      sort_order: sortOrder,
+    };
+    const url = buildUrl(this.BASE_URL, 'audit', params);
+    return this.http.get(url);
+  }
+
+   /**
+   * GET /audit/<log_id>
+   * Fetch a single audit log by its ID.
+   */
+  getAuditLogById(logId: string) {
+    const url = buildUrl(this.BASE_URL, `audit/${logId}`);
+    return this.http.get(url);
+  }
+
+  /**
+   * GET /audit/stats
+   * View aggregated audit statistics (actions per admin).
+   */
+  getAuditStats() {
+    const url = buildUrl(this.BASE_URL, 'audit/stats');
+    return this.http.get(url);
+  }
+
+  /**
+   * DELETE /audit/prune?days=90
+   * Prune (delete) audit logs older than `days` days.
+   */
+  pruneAuditLogs(days: number = 90) {
+    const params = { days };
+    const url = buildUrl(this.BASE_URL, 'audit/prune', params);
+    return this.http.delete(url);
+  }
+
 }

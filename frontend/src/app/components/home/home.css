@@ -24,7 +24,6 @@
   color: #f9fafb;
 }
 
-/* Unified panel / card styling for dark gradient theme */
 .home-stat-card,
 .home-panel-card {
   background: linear-gradient(135deg, rgba(30, 41, 59, 0.9), rgba(15, 23, 42, 0.95));
@@ -34,7 +33,6 @@
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.6), 0 0 20px rgba(99, 102, 241, 0.1);
 }
 
-/* Stat labels & values */
 .home-stat-label {
   color: #a5b4fc;
   letter-spacing: 0.08em;

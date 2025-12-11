@@ -1,0 +1,106 @@
+<div class="container py-4">
+  <!-- Toolbar -->
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <h4 class="mb-0">Audit Logs</h4>
+
+    <div class="d-flex flex-wrap gap-2 align-items-center">
+
+      <!-- Prune days input -->
+      <div class="d-flex align-items-center gap-1">
+        <label class="form-label mb-0 small me-1">Prune older than</label>
+        <input
+          type="number"
+          min="1"
+          class="form-control form-control-sm"
+          [(ngModel)]="pruneDays" />
+        <span class="small text-muted">days</span>
+      </div>
+
+      <!-- Refresh logs -->
+      <button
+        class="btn btn-sm btn-outline-dark"
+        type="button"
+        (click)="loadAuditLogs()"
+        [disabled]="loading">
+        {{ loading ? 'Loading…' : 'Refresh Logs' }}
+      </button>
+
+      <!-- View stats -->
+      <button
+        class="btn btn-sm btn-outline-primary"
+        type="button"
+        (click)="onLoadStats()"
+        [disabled]="statsLoading">
+        {{ statsLoading ? 'Loading stats…' : 'View Log Stats' }}
+      </button>
+
+      <!-- Prune logs -->
+      <button
+        class="btn btn-sm btn-outline-danger"
+        type="button"
+        (click)="onPrune()"
+        [disabled]="pruneLoading || loading">
+        {{ pruneLoading ? 'Pruning…' : 'Prune Logs' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- Error -->
+  <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+    {{ errorMessage }}
+  </div>
+
+  <!-- Success (for prune etc.) -->
+  <div *ngIf="successMessage" class="alert alert-success mb-3">
+    {{ successMessage }}
+  </div>
+
+  <!-- Grid -->
+  <ag-grid-angular
+    class="ag-theme-quartz"
+    style="height: 600px"
+    [pagination]="pagination"
+    [paginationPageSize]="paginationPageSize"
+    [paginationPageSizeSelector]="paginationPageSizeSelector"
+    [rowData]="rowData"
+    [columnDefs]="headings"
+    (gridReady)="onGridReady($event)"
+    (cellClicked)="onCellClicked($event)">
+  </ag-grid-angular>
+
+  <!-- Stats card -->
+  <div *ngIf="auditStats" class="card mt-3">
+    <div class="card-header">
+      <strong>Audit Log Statistics</strong>
+    </div>
+    <div class="card-body">
+      <p class="mb-2 small text-muted">
+        Total admins: {{ auditStats.total_admins }}
+      </p>
+
+      <div class="table-responsive">
+        <table class="table table-sm table-striped mb-0">
+          <thead>
+            <tr>
+              <th>Admin</th>
+              <th>Total Actions</th>
+              <th>Actions Breakdown</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of auditStats.summary">
+              <td>{{ row.admin }}</td>
+              <td>{{ row.total_actions }}</td>
+              <td>
+                <ng-container *ngFor="let a of row.actions; let i = index">
+                  <span>{{ a.action }} ({{ a.count }})</span>
+                  <span *ngIf="i < row.actions.length - 1"> · </span>
+                </ng-container>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

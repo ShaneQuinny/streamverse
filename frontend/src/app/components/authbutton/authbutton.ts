@@ -14,19 +14,20 @@ import { Login } from '../../models/login';
 })
 
 export class Authbutton {
-  // --- Modal visibility ---
+
+  //  Modal visibility 
   showLoginModal = false;
   showLogoutModal = false;
   showRegisterModal = false;
 
-  // --- Login form ---
+  // Login form 
   loginUsername = '';
   loginPassword = '';
   loginSubmitting = false;
   loginError = '';
   loginSuccess = '';
 
-  // --- Registration form ---
+  // Registration form 
   regUsername = '';
   regFullname = '';
   regEmail = '';
@@ -36,12 +37,7 @@ export class Authbutton {
   regError = '';
   regSuccess = '';
 
-  // --- Session refresh ---
-  isRefreshing = false;
-  refreshError = '';
-  refreshSuccess = '';
-
-  // --- Auth state (from service) ---
+  // Auth state
   isLoggedIn = false;
   currentUsername: string | null = null;
   hasExpiredSession = false;
@@ -133,8 +129,7 @@ export class Authbutton {
     });
   }
 
-  // --- Logout Modal ---
-
+  // Logout Modals
   openLogoutModal(): void {
     this.showLogoutModal = true;
   }
@@ -157,8 +152,7 @@ export class Authbutton {
     });
   }
 
-  // --- Register Modal ---
-
+  // Register Modals
   openRegisterModal(): void {
     this.regError = '';
     this.regSuccess = '';
@@ -174,6 +168,7 @@ export class Authbutton {
     this.regSuccess = '';
   }
 
+  // ---  ---
   onRegister(): void {
     this.regError = '';
     this.regSuccess = '';
@@ -236,39 +231,8 @@ export class Authbutton {
       },
       error: (err) => {
         this.regSubmitting = false;
-        this.regError =
-          err?.error?.errors?.error ||
-          err?.error?.message ||
-          'Registration failed. Please try again.';
+        this.regError = err?.error?.errors?.error || err?.error?.message || 'Registration failed. Please try again.';
       },
     });
-  }
-
-  // --- Session Refresh ---
-
-  onRefreshSession(): void {
-    this.refreshError = '';
-    this.refreshSuccess = '';
-    this.isRefreshing = true;
-
-    this.authService.refreshSession().subscribe({
-      next: () => {
-        this.isRefreshing = false;
-        this.refreshSuccess = 'Session refreshed successfully.';
-        this.authService.dismissSessionWarning();
-      },
-      error: (err) => {
-        this.isRefreshing = false;
-        this.refreshError =
-          err?.error?.errors?.error ||
-          err?.error?.message ||
-          'Could not refresh session. Please log in again.';
-        this.openLoginModal();
-      },
-    });
-  }
-
-  dismissSessionWarning(): void {
-    this.authService.dismissSessionWarning();
   }
 }

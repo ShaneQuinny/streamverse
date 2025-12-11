@@ -1,8 +1,11 @@
 <ag-grid-angular
   class="ag-theme-quartz"
   style="height: 850px"
+  [columnDefs]="headings" 
+  [rowData]="data"
   [pagination]="pagination"
   [paginationPageSize]="paginationPageSize"
   [paginationPageSizeSelector]="paginationPageSizeSelector"
-  [rowData]="data"
-  [columnDefs]="headings" />
+  (gridReady)="onGridReady($event)"
+  (cellClicked)="onCellClicked($event)">
+</ag-grid-angular>

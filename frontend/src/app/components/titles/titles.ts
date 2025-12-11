@@ -1,10 +1,10 @@
-import { Component } from '@angular/core';
+import { Component, OnDestroy } from '@angular/core';
 import { WebService } from '../../services/web/web-service';
 import { CacheService } from '../../services/cache/cache-service';
 import { RouterModule, Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Observable, Subscription } from 'rxjs';
+import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth/auth-service';
 
 @Component({
@@ -14,12 +14,13 @@ import { AuthService } from '../../services/auth/auth-service';
   templateUrl: './titles.html',
   styleUrl: './titles.css',
 })
-export class Titles {
+
+export class Titles implements OnDestroy {
   list_of_titles: any = [];
   totalPages: any;
   page: number = 1;
 
-  // --- Add Title modal state ---
+  //  Add Title modal state
   showAddTitleModal = false;
   addTitleForm!: FormGroup;
   isSavingTitle = false;
@@ -33,7 +34,7 @@ export class Titles {
   constructor(
     private webService: WebService,
     private cacheService: CacheService,
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private router: Router,
     private authService: AuthService
   ) {}
@@ -44,11 +45,11 @@ export class Titles {
       this.page = Number(sessionStorage['page']);
     }
 
-    // --- Initial auth state (current logged-in user) ---
+    // Get the current current logged-in user (if user logged in)
     this.currentUsername = this.authService.currentUsername;
     this.isAdmin = this.authService.isAdmin ?? false;
 
-    // --- Subscribe to auth state changes ---
+    // Subscribe to auth state changes 
     this.authSubscription = this.authService.auth$.subscribe((authState) => {
       this.currentUsername = authState.username;
       this.isAdmin = authState.isAdmin;
@@ -63,15 +64,14 @@ export class Titles {
 
 
   ngOnDestroy(): void {
-    // Clean up subscription to prevent memory leaks
+    // Clean up subscription 
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
   }
 
-  // ---------- Titles listing ----------
-
   loadTitles() {
+    // Get the titles from the streamverse API
     this.webService.getTitles(this.page).subscribe({
       next: (response: any) => {
         this.list_of_titles = response.data.titles;
@@ -85,6 +85,7 @@ export class Titles {
   }
 
   previousPage() {
+    // Handle page navigation
     if (this.page > 1) {
       this.page = this.page - 1;
       sessionStorage['page'] = this.page;
@@ -93,6 +94,7 @@ export class Titles {
   }
 
   nextPage() {
+    // Handle page navigation
     if (this.page < this.totalPages) {
       this.page = this.page + 1;
       sessionStorage['page'] = this.page;
@@ -101,6 +103,7 @@ export class Titles {
   }
 
   goToFirstPage() {
+    // Handle page navigation, allowing users to skip to the first page
     if (this.page !== 1) {
       this.page = 1;
       sessionStorage['page'] = this.page;
@@ -109,6 +112,7 @@ export class Titles {
   }
   
   goToLastPage() {
+    // Handle page navigation, allowing users to skip to the last page
     if (this.page !== this.totalPages) {
       this.page = this.totalPages;
       sessionStorage['page'] = this.page;
@@ -136,12 +140,10 @@ export class Titles {
     return this.cacheService.get(title._id) || '';
   }
 
-  // ---------- Add Title modal + form ----------
-
   private buildAddTitleForm(): void {
     const currentYear = new Date().getFullYear();
 
-    this.addTitleForm = this.fb.group({
+    this.addTitleForm = this.formBuilder.group({
       type: ['Movie', Validators.required],
       title: ['', Validators.required],
       description: ['', Validators.required],

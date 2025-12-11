@@ -10,6 +10,7 @@ import { AuthState } from '../../models/authstate';
   providedIn: 'root',
 })
 
+// Guided from https://medium.com/@topaloglu08/reactive-programming-and-state-management-in-angular-d537136905e6
 export class AuthService {
   // Reactive state management with BehaviorSubject
   private authState$ = new BehaviorSubject<AuthState>({

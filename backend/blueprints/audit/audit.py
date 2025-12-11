@@ -17,6 +17,14 @@ from admin actions throughout the system.
 # --- Define Audit Blueprint ---
 audit_bp = Blueprint("audit_bp", __name__)
 
+# --- Get All Titles ---
+def get_all_audit_logs():
+    data_to_return = []
+    for title in audit_logs.find():
+        title['_id'] = str(title['_id'])
+        data_to_return.append(title)
+    return data_to_return, 200 
+
 # --- View All Audit Logs ---
 def view_audit_logs():
     try:
@@ -150,6 +158,7 @@ def prune_audit_logs():
 
 # --- Route Definitions ---
 audit_routes = [
+    ("/all", "get_all_audit_logs", ["GET"], [jwt_required, admin_required, json_response]),
     ("", "view_audit_logs", ["GET"], [jwt_required, admin_required, json_response]),
     ("/<string:log_id>", "get_audit_log", ["GET"], [jwt_required, admin_required, json_response]),
     ("/stats", "view_audit_stats", ["GET"], [jwt_required, admin_required, json_response]),
