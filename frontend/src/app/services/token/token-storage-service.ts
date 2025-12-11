@@ -1,72 +1,74 @@
 import { Injectable } from '@angular/core';
 
+/**
+ * TokenStorageService that handles all storage operations
+ * for the StreamVerse authentication tokens and expiration state.
+ *
+ * This service provides a more central and consistent class for reading
+ * and writing access tokens and expiration timestamps used throughout the 
+ * StreamVerse FE to the localStorage.
+ *
+ */
 @Injectable({
   providedIn: 'root',
 })
 
 export class TokenStorageService {
-  //
+  /** Storage key for the JWT access token. */
   private readonly ACCESS_KEY = 'access_token';
-  private readonly REFRESH_KEY = 'refresh_token';
-  private readonly EXP_KEY = 'expiration';
-  private readonly SESSION_EXPIRED_KEY = 'session_expired';
 
-  //
+  /** Storage key for the token expiration timestamp. */
+  private readonly EXP_KEY = 'expiration';
+
+  /**
+   * Retrieves the current access token from storage.
+   *
+   * @returns The stored access token, or null if not present.
+   */
   getAccessToken(): string | null {
     return localStorage.getItem(this.ACCESS_KEY);
   }
 
-  //
-  getRefreshToken(): string | null {
-    return localStorage.getItem(this.REFRESH_KEY);
-  }
-
-  //
+  /**
+   * Retrieves the stored expiration timestamp for the access token.
+   *
+   * @returns The expiration value as a string, or null if not present.
+   */
   getExpiration(): string | null {
     return localStorage.getItem(this.EXP_KEY);
   }
 
-  //
-  isSessionExpired(): boolean {
-    return localStorage.getItem(this.SESSION_EXPIRED_KEY) === '1';
-  }
-
-  //
-  setTokens(accessToken: string, refreshToken: string, expiration?: number): void {
+  /**
+   * Stores the access token and expiration timestamp.
+   *
+   * @param accessToken The new access token.
+   * @param expiration  Unix timestamp representing token expiry.
+   */
+  setTokens(accessToken: string, expiration?: number): void {
     localStorage.setItem(this.ACCESS_KEY, accessToken);
-    localStorage.setItem(this.REFRESH_KEY, refreshToken);
     if (expiration) {
       localStorage.setItem(this.EXP_KEY, String(expiration));
     }
-    this.clearSessionExpiredFlag();
   }
 
-  //
+  /**
+   * Updates only the access token and expiration timestamp.  
+   *
+   * @param accessToken The new access token to store.
+   * @param expiration Updated expiration timestamp.
+   */
   setAccessToken(accessToken: string, expiration?: number): void {
     localStorage.setItem(this.ACCESS_KEY, accessToken);
     if (expiration) {
       localStorage.setItem(this.EXP_KEY, String(expiration));
     }
-    this.clearSessionExpiredFlag();
   }
 
-  //
-  setSessionExpiredFlag(): void {
-    localStorage.setItem(this.SESSION_EXPIRED_KEY, '1');
-  }
-
-  //
-  clearSessionExpiredFlag(): void {
-    localStorage.removeItem(this.SESSION_EXPIRED_KEY);
-  }
-
-  //
-  clearTokens(includeRefresh: boolean = true): void {
+  /**
+   * Clears authentication tokens from storage.
+   */
+  clearTokens(): void {
     localStorage.removeItem(this.ACCESS_KEY);
     localStorage.removeItem(this.EXP_KEY);
-    if (includeRefresh) {
-      localStorage.removeItem(this.REFRESH_KEY);
-    }
-    localStorage.removeItem(this.SESSION_EXPIRED_KEY);
   }
 }

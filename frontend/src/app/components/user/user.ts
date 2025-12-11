@@ -1,46 +1,77 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from '@angular/forms';
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, } from '@angular/forms';
 import { WebService } from '../../services/web/web-service';
 
+/**
+ * The User component provides a full admin interface for viewing
+ * and editing the details of StreamVerse users.
+ *
+ * Admins can do the following:
+ *  - Update profile information
+ *  - Reset the user's password
+ *  - Deactivating and reactivating accounts with reasons
+ *  - Permanently deleting a user from the system
+ *
+ */
 @Component({
   selector: 'app-user',
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: './user.html',
   styleUrls: ['./user.css'],
   providers: [WebService],
 })
+
 export class User {
+
+  /** Reactive form for editing main user details. */
   userForm!: FormGroup;
+
+  /** Reactive form for resetting a user's password. */
   passwordForm!: FormGroup;
 
-  usernameParam!: string; // original username from the URL
+  /** The username extracted from the route, representing the user being viewed or edited. */
+  usernameParam!: string;
+
+  /** Whether the user is currently active (true), inactive (false), or unknown (null). */
   userActive: boolean | null = null;
 
+  /** Global loading flag used across all user actions. */
   isLoading = false;
+
+  /** Indicates whether a password update request is in progress. */
   isPasswordUpdating = false;
+
+  /** Displays success messages for user actions. */
   successMessage = '';
+
+  /** Displays error messages for user actions. */
   errorMessage = '';
 
+  /**
+   * @constructor for the User component.
+   *
+   * @param route Used to read the "username" parameter from the URL.
+   * @param router Angular router for redirecting after operations.
+   * @param formBuilder FormBuilder used to construct reactive forms.
+   * @param webService Handles HTTP communication with the StreamVerse API.
+   */
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private webService: WebService
   ) {}
 
+  /**
+   * Lifecycle hook that runs once after component initialisation.
+   */
   ngOnInit(): void {
     this.usernameParam = this.route.snapshot.paramMap.get('username') || '';
 
     // Main user details form
-    this.userForm = this.fb.group({
+    this.userForm = this.formBuilder.group({
       username: ['', [Validators.required]],
       fullname: ['', [Validators.required]],
       email: ['', [Validators.required, Validators.email]],
@@ -49,7 +80,7 @@ export class User {
     });
 
     // Password reset form
-    this.passwordForm = this.fb.group({
+    this.passwordForm = this.formBuilder.group({
       new_password: ['', [Validators.required, Validators.minLength(8)]],
       confirm_password: ['', [Validators.required]],
     });
@@ -57,7 +88,9 @@ export class User {
     this.loadUser();
   }
 
-  // --- Load user from API ---
+  /**
+   * Retrieves user details from the API and populates the form..
+   */
   loadUser(): void {
     if (!this.usernameParam) return;
 
@@ -66,7 +99,6 @@ export class User {
 
     this.webService.getUser(this.usernameParam).subscribe({
       next: (resp: any) => {
-        // Depending how your json_response wrapper shapes it:
         const user = resp?.data?.user ?? resp?.data ?? resp?.user;
 
         if (!user) {
@@ -93,7 +125,11 @@ export class User {
     });
   }
 
-  // --- Save / update user details ---
+  /**
+   * Submits updated user information to the API.
+   * Also handles username changes by updating both the local variable
+   * and the current route URL when necessary.
+   */
   onSaveUserDetails(): void {
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
@@ -101,15 +137,15 @@ export class User {
     }
 
     const originalUsername = this.usernameParam;
-    const payload = { ...this.userForm.value };
+    const updatdedData = { ...this.userForm.value };
 
     this.isLoading = true;
     this.successMessage = '';
     this.errorMessage = '';
 
-    this.webService.updateUser(originalUsername, payload).subscribe({
-      next: (result: any) => {
-        const data = result?.data ?? result;
+    this.webService.updateUser(originalUsername, updatdedData).subscribe({
+      next: (response: any) => {
+        const data = response?.data ?? response;
 
         this.successMessage =
           data?.message || 'User updated successfully.';
@@ -117,7 +153,7 @@ export class User {
         const updatedUsername = data?.updated_username;
         if (updatedUsername && updatedUsername !== originalUsername) {
           this.usernameParam = updatedUsername;
-          // keep URL in sync with new username
+
           this.router.navigate(['/admin/users', updatedUsername], {
             replaceUrl: true,
           });
@@ -126,18 +162,18 @@ export class User {
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage =
-          err?.error?.errors?.error || err?.error?.message || 'Failed to update user.';
+        this.errorMessage = err?.errors?.error || 'Failed to update user.';
         this.isLoading = false;
       },
     });
   }
 
-  // --- Reset password ---
+  /**
+   * Resets a user's password using the values from the password form.
+   * Performs validation before submitting to the API.
+   */
   onResetPassword(): void {
-    console.log('onResetPassword called', this.passwordForm.value);
-
-        if (this.passwordForm.invalid) {
+    if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
     }
@@ -149,25 +185,24 @@ export class User {
     this.successMessage = '';
     this.errorMessage = '';
 
-    this.webService
-      .resetUserPassword(this.usernameParam, newPw, confirmPw)
-      .subscribe({
-        next: (res: any) => {
-          const data = res?.data ?? res;
-          this.successMessage =
-            data?.message || 'Password reset successfully.';
-          this.passwordForm.reset();
-          this.isPasswordUpdating = false;
-        },
-        error: (err) => {
-          this.errorMessage =
-            err?.error?.errors?.message || 'Failed to reset password.';
-          this.isPasswordUpdating = false;
-        },
-      });
+    this.webService.resetUserPassword(this.usernameParam, newPw, confirmPw).subscribe({
+      next: (response: any) => {
+        const data = response?.data ?? response;
+        this.successMessage = data?.message || 'Password reset successfully.';
+        this.passwordForm.reset();
+        this.isPasswordUpdating = false;
+      },
+      error: (err) => {
+        this.errorMessage = err?.errors?.message || 'Failed to reset password.';
+        this.isPasswordUpdating = false;
+      },
+    });
   }
 
-  // --- Deactivate ---
+  /**
+   * Deactivates the user and records a reason if provided.
+   * Updates the UI state so the user appears inactive.
+   */
   onDeactivate(): void {
     const reason = this.userForm.get('reason')?.value?.trim() || 'Deactivated via admin UI';
 
@@ -176,21 +211,23 @@ export class User {
     this.errorMessage = '';
 
     this.webService.deactivateUser(this.usernameParam, reason).subscribe({
-      next: (res: any) => {
-        const data = res?.data ?? res;
+      next: (response: any) => {
+        const data = response?.data ?? response;
         this.successMessage = data?.message || 'User deactivated.';
         this.userActive = false;
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage =
-          err?.error?.errors?.error || err?.error?.message || 'Failed to deactivate user.';
+        this.errorMessage = err?.errors?.error || 'Failed to deactivate user.';
         this.isLoading = false;
       },
     });
   }
 
-  // --- Reactivate ---
+  /**
+   * Reactivates the user and records a reason if provided.
+   * Updates the UI state so the user appears active.
+   */
   onReactivate(): void {
     const reason = this.userForm.get('reason')?.value?.trim() || 'Reactivated via admin UI';
 
@@ -199,27 +236,25 @@ export class User {
     this.errorMessage = '';
 
     this.webService.reactivateUser(this.usernameParam, reason).subscribe({
-      next: (res: any) => {
-        const data = res?.data ?? res;
+      next: (response: any) => {
+        const data = response?.data ?? response;
         this.successMessage = data?.message || 'User reactivated.';
         this.userActive = true;
         this.isLoading = false;
       },
       error: (err) => {
-        this.errorMessage =
-          err?.error?.errors?.error || err?.error?.message || 'Failed to reactivate user.';
+        this.errorMessage = err?.errors?.error || 'Failed to reactivate user.';
         this.isLoading = false;
       },
     });
   }
 
-  // --- Delete ---
+  /**
+   * Permanently removes the user from StreamVerse and
+   * redirects the admin back to the users grid.
+   */
   onDelete(): void {
-    if (
-      !confirm(
-        'Are you sure you want to permanently delete this user? This cannot be undone.'
-      )
-    ) {
+    if (!confirm('Are you sure you want to permanently delete this user? This cannot be undone.')) {
       return;
     }
 
@@ -230,12 +265,10 @@ export class User {
     this.webService.deleteUser(this.usernameParam).subscribe({
       next: () => {
         this.isLoading = false;
-        // Go back to the users grid
         this.router.navigate(['/admin/users']);
       },
       error: (err) => {
-        this.errorMessage =
-          err?.error?.errors?.error || err?.error?.message || 'Failed to delete user.';
+        this.errorMessage = err?.errors?.error || 'Failed to delete user.';
         this.isLoading = false;
       },
     });

@@ -3,8 +3,17 @@ import { CommonModule } from '@angular/common';
 import { RouterLink } from '@angular/router';
 import { WebService } from '../../services/web/web-service';
 import { AuthService } from '../../services/auth/auth-service';
-import { RatingStats, GenreCount, TopReviewedTitle } from '../../models/homestats';
+import { RatingStats, GenreCount, TopReviewedTitle } from '../../interfaces/homestats';
 
+/**
+ * The Home component is the landing page of the StreamVerse FE.
+ *
+ * It displays three title stats returned from the Streamverse API, including:
+ *  - Titles rating average (IMDb & Rotten Tomatoes)
+ *  - Most common genres in Streamverse
+ *  - Titles with the highest number of reviews
+ * 
+ */
 @Component({
   selector: 'app-home',
   imports: [CommonModule, RouterLink],
@@ -13,44 +22,77 @@ import { RatingStats, GenreCount, TopReviewedTitle } from '../../models/homestat
   styleUrl: './home.css',
 })
 
-export class Home { 
-  // Stats
+export class Home {
+
+  /** Global rating statistics retrieved from the API. */
   ratingStats: RatingStats | null = null;
+
+  /** The most frequent genres returned by the API. */
   topGenres: GenreCount[] = [];
+
+  /** * Titles with the highest review counts. */
   topReviewedTitles: TopReviewedTitle[] = [];
 
-  // Loading states
+  /** Loading state for rating statistics. */
   isLoadingStats = false;
+
+  /** Loading state for genre statistics. */
   isLoadingGenres = false;
+
+  /** Loading state for top-reviewed titles. */
   isLoadingTopReviewed = false;
 
-  // Error states
+  /** Error message for rating statistics fetching. */
   statsError = '';
+
+  /** Error message for genre statistics fetching. */
   genresError = '';
+
+  /** Error message for top-reviewed titles fetching. */
   topReviewedError = '';
 
+  /**
+   * @constructor for the Home component.
+   *
+   * @param webService Handles HTTP communication with the StreamVerse API.
+   * @param authService Handles authentication actions and exposes the reactive authentication state.
+   */
   constructor(
     private webService: WebService,
     private authService: AuthService
   ) {}
 
+  /**
+   * Lifecycle hook that runs once after component initialisation.
+   * Fetches all required homepage stats.
+   */
   ngOnInit(): void {
     this.fetchRatingStats();
     this.fetchTopGenres();
     this.fetchTopReviewedTitles();
   }
 
-  // Check to see if the a user is logged in
+  /**
+   * Indicates whether the user is currently logged in.
+   *
+   * @returns "true" if an user is logged in, otherwise "false".
+   */
   get isLoggedIn(): boolean {
     return this.authService.isLoggedIn;
   }
-  
-  // Get the current user (if logged in)
+
+  /**
+   * Returns the username of the currently authenticated user.
+   *
+   * @returns The username string, or "null" if no user is logged in.
+   */
   get currentUser(): string | null {
     return this.authService.currentUsername;
   }
 
-  // --- Fetch the rating stats from Streamverse API ---  
+  /**
+   * Retrieves rating stats from the StreamVerse API.
+   */
   fetchRatingStats(): void {
     this.isLoadingStats = true;
     this.statsError = '';
@@ -60,8 +102,7 @@ export class Home {
         this.isLoadingStats = false;
 
         if (!response?.success) {
-          this.statsError =
-            response?.errors?.error || response?.errors?.message || 'Could not load stats.';
+          this.statsError =  response?.errors?.error || 'Could not load stats.';
           return;
         }
 
@@ -79,67 +120,64 @@ export class Home {
       },
       error: (err) => {
         this.isLoadingStats = false;
-        this.statsError = err?.error?.errors?.error || err?.error?.message || 'Could not load stats.';
+        this.statsError = err?.errors?.error || 'Could not load stats.';
       },
     });
   }
 
-  // --- Fetch the top generes from Streamverse API ---
+  /**
+   * Retrieves the most frequent genres from the StreamVerse API.
+   * Requests the first page of results, limited to 8 entries, sorted
+   * in descending order.
+   */
   fetchTopGenres(): void {
     this.isLoadingGenres = true;
     this.genresError = '';
 
-    // first page, top 8 genres, desc
     this.webService.getGenreCounts(1, 8, 'desc').subscribe({
       next: (response: any) => {
         this.isLoadingGenres = false;
 
         if (!response?.success) {
-          this.genresError =
-            response?.errors?.error || response?.errors?.message || 'Could not load genres.';
+          this.genresError = response?.errors?.error || 'Could not load genres.';
           return;
         }
 
         const list = response.data?.genre_count;
-        if (Array.isArray(list)) {
-          this.topGenres = list as GenreCount[];
-        } else {
-          this.topGenres = [];
-        }
+        this.topGenres = Array.isArray(list) ? list as GenreCount[] : [];
       },
       error: (err) => {
         this.isLoadingGenres = false;
-        this.genresError = err?.error?.errors?.error || err?.error?.message || 'Could not load genres.';
+        this.genresError = err?.errors?.error || 'Could not load genres.';
       },
     });
   }
 
-  // --- Fetch the top reviewed titles from Streamverse API ---
+  /**
+   * Retrieves the titles with the highest number of reviews.
+   * Requests the first page, limited to 5 results, sorted descending.
+   */
   fetchTopReviewedTitles(): void {
     this.isLoadingTopReviewed = true;
     this.topReviewedError = '';
 
-    // first page, top 5 titles, desc
     this.webService.getTopReviewedTitles(1, 5, 'desc').subscribe({
       next: (response: any) => {
         this.isLoadingTopReviewed = false;
 
         if (!response?.success) {
-          this.topReviewedError = 
-            response?.errors?.error ||response?.errors?.message || 'Could not load top reviewed titles.';
+          this.topReviewedError = response?.errors?.error || 'Could not load top reviewed titles.';
           return;
         }
 
         const list = response.data?.top_reviewed_titles;
-        if (Array.isArray(list)) {
-          this.topReviewedTitles = list as TopReviewedTitle[];
-        } else {
-          this.topReviewedTitles = [];
-        }
+        this.topReviewedTitles = Array.isArray(list)
+          ? list as TopReviewedTitle[]
+          : [];
       },
       error: (err) => {
         this.isLoadingTopReviewed = false;
-        this.topReviewedError = err?.error?.errors?.error || err?.error?.message || 'Could not load top reviewed titles.';
+        this.topReviewedError = err?.errors?.error || 'Could not load top reviewed titles.';
       },
     });
   }

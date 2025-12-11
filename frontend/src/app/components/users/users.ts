@@ -8,6 +8,17 @@ import { Router } from '@angular/router';
 ModuleRegistry.registerModules([AllCommunityModule]);
 provideGlobalGridOptions({ theme: 'legacy' });
 
+/**
+ * The Users component displays a grid of all registered StreamVerse users
+ * for admin management.
+ *
+ * It uses AG Grid to display user details such as username, role, status,
+ * and audit timestamps. From this grid, an admin can click through to
+ * a dedicated user management view for an individual account.
+ *
+ * Data is fetched from the API via the WebService.
+ *
+ */
 @Component({
   selector: 'app-users',
   imports: [CommonModule, AgGridAngular],
@@ -17,7 +28,11 @@ provideGlobalGridOptions({ theme: 'legacy' });
 })
 
 export class Users {
-  // Column definitions for the grid
+
+  /**
+   * Column definitions for the AG Grid, including derived role/status
+   * fields and an "Actions" column for navigation.
+   */
   columnDefs: ColDef[] = [
     { field: 'username', headerName: 'Username', filter: true },
     { field: 'fullname', headerName: 'Full Name', filter: true },
@@ -29,29 +44,47 @@ export class Users {
     { headerName: 'Actions', field: 'actions', cellRenderer: () => '<button class="btn btn-sm btn-outline-dark">View User</button>' },
   ];
 
-  // Grid data
+  /** Data source for the grid, populated with user objects returned from the API. */
   rowData: any[] = [];
 
-  // Pagination (front-end using ag-Grid pagination)
+  /** Enables AG Grid's built-in pagination. */
   pagination = true;
+
+  /** Default number of rows displayed per page. */
   paginationPageSize = 10;
+
+  /** User-selectable page-size options. */
   paginationPageSizeSelector = [10, 25, 50];
 
+  /** Indicates whether the user data is currently being loaded. */
   loading = false;
+
+  /** Stores any error message encountered while loading the users. */
   errorMessage = '';
 
+  /**
+   * @constructor for the Users component.
+   *
+   * @param webService Handles HTTP communication with the StreamVerse API.
+   * @param router Used to navigate after authentication events.
+   */
   constructor(
     private webService: WebService,
     private router: Router
   ) {}
 
+  /**
+   * Lifecycle hook that runs once after component initialisation
+   * and populates the AG-Grid.
+   */
   ngOnInit(): void {
     this.loadUsers();
   }
 
-  onGridReady(_event: GridReadyEvent): void { }
-
-  // Load users from backend
+  /**
+   * Loads users from the back-end API and populates the grid.
+   * Manages loading and error state for the view.
+   */
   loadUsers(): void {
     this.loading = true;
     this.errorMessage = '';
@@ -63,14 +96,20 @@ export class Users {
       },
       error: (err) => {
         console.error('Failed to load users', err);
-        this.errorMessage =
-          err?.error?.errors?.error || 'Failed to load users. Please try again.';
+        this.errorMessage = err?.errors?.error || 'Failed to load users. Please try again.';
         this.loading = false;
       },
     });
   }
 
-  // Handle clicks on the "View User" button
+  /**
+   * Handles cell click events from the grid.
+   *
+   * Specifically listens for clicks inside the "Actions" column and,
+   * when triggered, navigates to the detailed view for the selected audit log.
+   *
+   * @param event AG Grid cell click event data containing row and column info.
+   */
   onCellClicked(event: any): void {
     if (event.colDef.field === 'actions') {
       const username = event.data?.username;
@@ -80,6 +119,11 @@ export class Users {
     }
   }
 
+  /**
+   * Navigates to the user (details) component for the specified username.
+   *
+   * @param username The username of the user to view.
+   */
   onViewUser(username: string): void {
     this.router.navigate(['/admin/users', username]);
   }

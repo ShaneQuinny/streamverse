@@ -6,6 +6,7 @@ import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { AuthService } from '../../services/auth/auth-service';
+import { ExternalService } from '../../services/external/external-service';
 
 @Component({
   selector: 'app-titles',
@@ -36,7 +37,8 @@ export class Titles implements OnDestroy {
     private cacheService: CacheService,
     private formBuilder: FormBuilder,
     private router: Router,
-    private authService: AuthService
+    private authService: AuthService,
+    private externalService: ExternalService
   ) {}
 
   ngOnInit() {
@@ -124,13 +126,12 @@ export class Titles implements OnDestroy {
     this.list_of_titles.forEach((title: any) => {
       if (this.cacheService.has(title._id)) return;
 
-      this.webService.getMoviePoster(title.title, title.release_year).subscribe({
+      this.externalService.getMoviePoster(title.title, title.release_year).subscribe({
         next: (response: any) => {
           this.cacheService.set(title._id, response.Poster || '');
         },
         error: (err) => {
           console.error(`Error fetching poster for ${title.title}:`, err);
-          this.cacheService.set(title._id, '');
         },
       });
     });

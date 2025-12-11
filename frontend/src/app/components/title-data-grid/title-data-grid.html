@@ -1,11 +1,17 @@
-<ag-grid-angular
-  class="ag-theme-quartz"
-  style="height: 850px"
-  [columnDefs]="headings" 
-  [rowData]="data"
-  [pagination]="pagination"
-  [paginationPageSize]="paginationPageSize"
-  [paginationPageSizeSelector]="paginationPageSizeSelector"
-  (gridReady)="onGridReady($event)"
-  (cellClicked)="onCellClicked($event)">
-</ag-grid-angular>
+ <div>
+ <!-- Error -->
+  <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+    {{ errorMessage }}
+  </div>
+
+  <ag-grid-angular
+    class="ag-theme-quartz"
+    style="height: 850px"
+    [columnDefs]="headings" 
+    [rowData]="data"
+    [pagination]="pagination"
+    [paginationPageSize]="paginationPageSize"
+    [paginationPageSizeSelector]="paginationPageSizeSelector"
+    (cellClicked)="onCellClicked($event)">
+  </ag-grid-angular>
+</div>

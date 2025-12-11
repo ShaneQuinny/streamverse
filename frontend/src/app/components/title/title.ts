@@ -6,15 +6,16 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Observable, Subscription } from 'rxjs';
 import { WebService } from '../../services/web/web-service';
-import { Title as TitleModel} from '../../models/title';
-import { Review } from '../../models/review';
+import { Title as TitleModel} from '../../interfaces/title';
+import { Review } from '../../interfaces/review';
 import { AuthService } from '../../services/auth/auth-service';
 import { CacheService } from '../../services/cache/cache-service';
+import { ExternalService } from '../../services/external/external-service';
 
 @Component({
   selector: 'app-title',
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
-  providers: [WebService, CacheService],
+  providers: [WebService, CacheService, ExternalService],
   templateUrl: './title.html',
   styleUrl: './title.css',
 })
@@ -44,6 +45,7 @@ export class Title implements OnDestroy {
     private webService: WebService,
     private authService: AuthService,
     private cacheService: CacheService,
+    private externalService: ExternalService,
     private router: Router
   ) {}
   
@@ -81,7 +83,7 @@ export class Title implements OnDestroy {
         this.title = title;
 
         if (!this.cacheService.has(title._id)) {
-          this.webService.getMoviePoster(title.title, title.release_year).subscribe({
+          this.externalService.getMoviePoster(title.title, title.release_year).subscribe({
             next: (response: any) => {
               this.cacheService.set(title._id, response.Poster || '');
             },

@@ -1,64 +1,115 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../services/auth/auth-service';
-import { Register } from '../../models/register';
-import { Login } from '../../models/login';
+import { Register } from '../../interfaces/register';
+import { Login } from '../../interfaces/login';
 
+/**
+ * The Authbutton component provides a reusable authentication control
+ * that can be placed in the navigation bar.
+ *
+ * The component manages modal dialogs for:
+ * - Logging in
+ * - Logging out confirmation
+ * - User registration
+ *
+ * All authentication actions call the AuthService.
+ * 
+ */
 @Component({
   selector: 'app-authbutton',
   imports: [CommonModule, FormsModule],
+  providers: [AuthService],
   templateUrl: './authbutton.html',
   styleUrl: './authbutton.css',
 })
 
 export class Authbutton {
-
-  //  Modal visibility 
+  /** Controls visibility of the login modal dialog. */
   showLoginModal = false;
+
+  /** Controls visibility of the logout confirmation modal dialog. */
   showLogoutModal = false;
+
+  /** Controls visibility of the registration modal dialog. */
   showRegisterModal = false;
 
-  // Login form 
+  /** Username entered in the login form. */
   loginUsername = '';
+
+  /** Password entered in the login form. */
   loginPassword = '';
+
+  /** Indicates whether the login form is currently submitting. */
   loginSubmitting = false;
+
+  /** Stores any validation or API error message for the login form. */
   loginError = '';
+
+  /** Stores a short success message when login completes successfully. */
   loginSuccess = '';
 
-  // Registration form 
+  /** Username entered in the registration form. */
   regUsername = '';
+
+  /** Full name entered in the registration form. */
   regFullname = '';
+
+  /** Email address entered in the registration form. */
   regEmail = '';
+
+  /** Password entered in the registration form. */
   regPassword = '';
+
+  /** Confirmation password entered in the registration form. */
   regConfirmPassword = '';
+
+  /** Indicates whether the registration form is currently submitting. */
   regSubmitting = false;
+
+  /** Stores any validation or API error message for the registration form. */
   regError = '';
+
+  /** Stores a success message when registration completes successfully. */
   regSuccess = '';
 
-  // Auth state
+  /** Indicates whether the user is currently logged in according to the AuthService state. */
   isLoggedIn = false;
-  currentUsername: string | null = null;
-  hasExpiredSession = false;
 
+  /** The username of the currently authenticated user, or null if no user is logged in. */
+  currentUsername: string | null = null;
+
+  /**
+   * @constructor for the Authbutton component.
+   *
+   * @param authService Handles authentication actions and exposes the reactive authentication state.
+   * @param router Used to navigate after authentication events.
+   */
   constructor(
     public authService: AuthService,
     public router: Router
   ) {}
 
+  /**
+   * Lifecycle hook that runs once after component initialisation.
+   * Subscribes to the AuthService state so the component can update
+   * its UI when the user logs in or out.
+   */
   ngOnInit(): void {
-    // Subscribe to auth state changes
     this.authService.auth$
       .subscribe((state) => {
         this.isLoggedIn = state.isLoggedIn;
         this.currentUsername = state.username;
-        this.hasExpiredSession = this.authService.hasExpiredSession;
       });
   }
 
-  // --- UI Actions ---
-
+  /**
+   * Handles clicks on the primary auth button.
+   * - If the user is logged in, opens the logout confirmation modal.
+   * - If the user is logged out, opens the login modal.
+   */
   onPrimaryClick(): void {
     if (this.isLoggedIn) {
       this.openLogoutModal();
@@ -67,14 +118,14 @@ export class Authbutton {
     }
   }
 
-  // --- Login Modal ---
-
+  /** Opens the login modal and clears any existing login messages. */
   openLoginModal(): void {
     this.loginError = '';
     this.loginSuccess = '';
     this.showLoginModal = true;
   }
 
+  /** Closes the login modal and clears sensitive form fields and messages. */
   closeLoginModal(): void {
     this.showLoginModal = false;
     this.loginPassword = '';
@@ -82,6 +133,11 @@ export class Authbutton {
     this.loginSuccess = '';
   }
 
+  /**
+   * Submits the login form to the AuthService, which will then send an API
+   * request to the Streamverse API to login the user and return the JWT
+   * access token.
+   */
   onLogin(): void {
     this.loginError = '';
     this.loginSuccess = '';
@@ -103,56 +159,51 @@ export class Authbutton {
         this.loginSubmitting = false;
 
         if (!response?.success) {
-          this.loginError =
-            response?.errors?.error ||
-            response?.errors?.message ||
-            'Login failed. Please check your credentials.';
+          this.loginError = response?.errors?.error || 'Login failed. Please check your credentials.';
           return;
         }
 
         this.loginSuccess = 'Logged in successfully.';
         this.loginUsername = '';
         this.loginPassword = '';
-        
-        // Close modal after short delay to show success message
-        setTimeout(() => {
-          this.closeLoginModal();
-        }, 1000);
+
+        this.closeLoginModal();
       },
       error: (err) => {
         this.loginSubmitting = false;
-        this.loginError =
-          err?.error?.errors?.error ||
-          err?.error?.message ||
-          'Login failed. Please try again.';
+        this.loginError = err?.errors?.error || 'Login failed. Please try again.';
       },
     });
   }
 
-  // Logout Modals
+  /** Opens the logout confirmation modal.*/
   openLogoutModal(): void {
     this.showLogoutModal = true;
   }
 
+  /** Closes the logout confirmation modal. */
   closeLogoutModal(): void {
     this.showLogoutModal = false;
   }
 
+  /** Confirms the logout action and sends the request to the AuthService. */
   confirmLogout(): void {
     this.showLogoutModal = false;
     this.authService.logout().subscribe({
       next: () => {
-        // Optionally redirect or show message
         console.log('Logged out successfully');
       },
       error: (err) => {
         console.error('Logout error:', err);
-        // State is cleared even on error
+        err?.errors?.error || 'Logout failed. Please try again.';
       },
     });
   }
 
-  // Register Modals
+  /**
+   * Opens the registration modal, closing the login modal if it is open,
+   * and clears any existing registration messages.
+   */
   openRegisterModal(): void {
     this.regError = '';
     this.regSuccess = '';
@@ -160,6 +211,7 @@ export class Authbutton {
     this.showRegisterModal = true;
   }
 
+  /** Closes the registration modal and clears sensitive fields and messages. */
   closeRegisterModal(): void {
     this.showRegisterModal = false;
     this.regPassword = '';
@@ -168,7 +220,11 @@ export class Authbutton {
     this.regSuccess = '';
   }
 
-  // ---  ---
+  /**
+   * Submits the registration form to the AuthService, which will then send an API
+   * request to the Streamverse API to registration the user. Once completed, the user
+   * will be redirected to the login modal with login username prefilled.
+   */
   onRegister(): void {
     this.regError = '';
     this.regSuccess = '';
@@ -203,35 +259,25 @@ export class Authbutton {
         this.regSubmitting = false;
 
         if (!response?.success) {
-          this.regError =
-            response?.errors?.error ||
-            response?.errors?.message ||
-            'Registration failed.';
+          this.regError = response?.errors?.error || 'Registration failed.';
           return;
         }
 
-        this.regSuccess =
-          response?.data?.message || 'Registration successful. Please log in.';
-
-        // Prefill login username
+        this.regSuccess = response?.data?.message || 'Registration successful. Please log in.';
         this.loginUsername = this.regUsername;
 
-        // Clear registration form
         this.regUsername = '';
         this.regFullname = '';
         this.regEmail = '';
         this.regPassword = '';
         this.regConfirmPassword = '';
 
-        // Switch to login modal after delay
-        setTimeout(() => {
-          this.closeRegisterModal();
-          this.openLoginModal();
-        }, 1500);
+        this.closeRegisterModal();
+        this.openLoginModal();
       },
       error: (err) => {
         this.regSubmitting = false;
-        this.regError = err?.error?.errors?.error || err?.error?.message || 'Registration failed. Please try again.';
+        this.regError = err?.errors?.error || 'Registration failed. Please try again.';
       },
     });
   }
