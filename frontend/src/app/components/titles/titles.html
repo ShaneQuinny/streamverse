@@ -1,0 +1,212 @@
+<div class="titles-container">
+  <div class="container">
+
+    <!-- Header row with Add Title button -->
+    <div class="row mb-4">
+      <div class="col-12 d-flex justify-content-between align-items-center">
+        <h2 class="text-white mb-0">Browse Titles</h2>
+
+        @if (currentUsername) {
+          <button
+            type="button"
+            class="btn btn-yellow"
+            (click)="openAddTitleModal()">
+            <i class="bi bi-plus-circle me-2"></i>
+            Add Title
+          </button>
+        }
+      </div>
+    </div>
+
+    <!-- Add Title Modal -->
+    @if (showAddTitleModal) {
+      <div class="add-title-backdrop">
+        <div class="add-title-modal">
+          <div class="add-title-header">
+            <h5 class="mb-0 text-white">
+              <i class="bi bi-plus-circle me-2"></i>
+              Add New Title
+            </h5>
+            <button
+              type="button"
+              class="btn-close"
+              aria-label="Close"
+              (click)="closeAddTitleModal()">
+            </button>
+          </div>
+
+          <form [formGroup]="addTitleForm" (ngSubmit)="onSubmitAddTitle()">
+            <div class="add-title-body">
+              <div class="row">
+                <div class="col-md-4 mb-3">
+                  <label class="form-label text-white">Type</label>
+                  <select class="form-select" formControlName="type">
+                    <option value="Movie">Movie</option>
+                    <option value="TV Show">TV Show</option>
+                  </select>
+                </div>
+
+                <div class="col-md-8 mb-3">
+                  <label class="form-label text-white">Title</label>
+                  <input type="text" class="form-control" formControlName="title" />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label text-white">Description</label>
+                <textarea
+                  class="form-control"
+                  rows="3"
+                  formControlName="description">
+                </textarea>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-white">Cast (comma separated)</label>
+                  <input type="text" class="form-control" formControlName="cast" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-white">Directors (comma separated)</label>
+                  <input type="text" class="form-control" formControlName="directors" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-white">Languages (comma separated)</label>
+                  <input type="text" class="form-control" formControlName="languages" />
+                </div>
+                <div class="col-md-6 mb-3">
+                  <label class="form-label text-white">Genres (comma separated)</label>
+                  <input type="text" class="form-control" formControlName="genres" />
+                </div>
+              </div>
+
+              <div class="row">
+                <div class="col-md-3 mb-3">
+                  <label class="form-label text-white">Release Year</label>
+                  <input type="number" class="form-control" formControlName="release_year" />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label text-white">Duration (mins)</label>
+                  <input type="number" class="form-control" formControlName="duration_in_mins" />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label text-white">Rating (cert)</label>
+                  <input type="text" class="form-control" formControlName="rating" />
+                </div>
+                <div class="col-md-3 mb-3">
+                  <label class="form-label text-white">IMDb Rating</label>
+                  <input type="number" step="0.1" class="form-control" formControlName="imdb_rating" />
+                </div>
+              </div>
+
+              <div class="mb-3">
+                <label class="form-label text-white">Rotten Tomatoes Score (%)</label>
+                <input type="number" class="form-control" formControlName="rotten_tomatoes_score" />
+              </div>
+
+              @if (addTitleError) {
+                <div class="alert alert-danger py-2">
+                  {{ addTitleError }}
+                </div>
+              }
+            </div>
+
+            <div class="add-title-footer">
+              <button
+                type="submit"
+                class="btn btn-yellow"
+                [disabled]="addTitleForm.invalid || isSavingTitle">
+                {{ isSavingTitle ? 'Adding…' : 'Add Title' }}
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-light ms-2"
+                (click)="closeAddTitleModal()">
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    }
+
+    <!-- Titles grid -->
+    <div class="row g-3">
+      @for (title of list_of_titles; track title._id) {
+        <div class="col-lg-4 col-md-6 col-sm-12">
+          <div class="title-card" [routerLink]="['/titles', title._id]">
+            <div class="title-card-header">
+              <div class="d-flex justify-content-between align-items-start">
+                <h5 class="title-name">{{ title.title }}</h5>
+                <span class="title-type-badge">{{ title.type }}</span>
+              </div>
+            </div>
+            
+            <div class="title-card-body">
+              <div class="title-meta">
+                <span class="meta-item">
+                  <i class="bi bi-calendar3"></i> {{ title.release_year }}
+                </span>
+                <span class="meta-item">
+                  <i class="bi bi-clock"></i> {{ title.duration_in_mins }}min
+                </span>
+                <span class="meta-item rating-badge">{{ title.rating }}</span>
+              </div>
+              
+              <div class="title-genres">
+                @for (genre of title.genres.slice(0, 3); track genre) {
+                  <span class="genre-tag">{{ genre }}</span>
+                }
+              </div>
+              
+              <p class="title-description">
+                {{ title.description.length > 120 ? title.description.substring(0, 120) + '...' : title.description }}
+              </p>
+              
+              <div class="title-ratings">
+                <span class="rating-item">
+                  <strong>IMDb:</strong> {{ title.imdb_rating }}/10
+                </span>
+                <span class="rating-item">
+                  <strong>Rotten Tomatoes:</strong> {{ title.rotten_tomatoes_score }}%
+                </span>
+              </div>
+              
+              <div class="platforms">
+                @for (platform of title.available_on.slice(0, 4); track platform.platform) {
+                  <span class="platform-badge">{{ platform.platform }}</span>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    <div class="row mt-5">
+      <div class="col-4">
+        <button class="btn btn-outline-light me-4" (click)="goToFirstPage()" [disabled]="page === 1">
+          <i class="bi bi-chevron-left"></i> First Page
+        </button>
+        <button class="btn btn-outline-light" (click)="previousPage()" [disabled]="page === 1">
+          <i class="bi bi-chevron-left"></i> Previous
+        </button>
+      </div>    
+      <div class="col-4 text-center align-self-center">
+        <span class="text-white">Page {{ page }} of {{ totalPages }}</span>
+      </div>  
+      <div class="col-4 text-end">
+        <button class="btn btn-outline-light me-4" (click)="nextPage()" [disabled]="page === totalPages">
+          Next <i class="bi bi-chevron-right"></i>
+        </button>
+        <button class="btn btn-outline-light" (click)="goToLastPage()" [disabled]="page === totalPages">
+          Last Page <i class="bi bi-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

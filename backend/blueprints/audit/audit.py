@@ -150,7 +150,7 @@ def prune_audit_logs():
 
 # --- Route Definitions ---
 audit_routes = [
-    ("/", "view_audit_logs", ["GET"], [jwt_required, admin_required, json_response]),
+    ("", "view_audit_logs", ["GET"], [jwt_required, admin_required, json_response]),
     ("/<string:log_id>", "get_audit_log", ["GET"], [jwt_required, admin_required, json_response]),
     ("/stats", "view_audit_stats", ["GET"], [jwt_required, admin_required, json_response]),
     ("/prune", "prune_audit_logs", ["DELETE"], [jwt_required, admin_required, json_response]),

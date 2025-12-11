@@ -90,6 +90,16 @@ def show_one_title(title_id):
 
     except Exception as e:
         return {"error": f"Server error: {str(e)}"}, 500
+
+# --- Get All Titles ---
+def get_all_titles():
+    data_to_return = []
+    for title in titles.find():
+        title['_id'] = str(title['_id'])
+        for review in title['reviews']:
+            review['_id'] = str( review['_id'] )
+        data_to_return.append(title)
+    return data_to_return, 200 
     
 # --- Create New Title ---
 def add_title():
@@ -303,7 +313,7 @@ def get_top_reviewed_titles():
 
         # Find the top reviewed titles with the highest number of reviews with pagniation
         pipeline = [
-            {"$project": {"_id": 0, "title": 1, "review_count": {"$size": "$reviews"}}},
+            {"$project": {"_id": 1, "title": 1, "review_count": {"$size": "$reviews"}}},
             {"$sort": {"review_count": sort_direction}},
             {"$skip": skip},
             {"$limit": page_size}
@@ -311,6 +321,9 @@ def get_top_reviewed_titles():
 
         # Execute aggregation pipeline for paginated results and return to be serialized 
         result = list(titles.aggregate(pipeline))
+        for doc in result:
+            doc["_id"] = str(doc["_id"])
+
         return {
             "page": page_num,
             "page_size": page_size,
@@ -452,9 +465,10 @@ def construct_filtered_query(request):
     
 # --- Route Definitions ---
 titles_routes = [
-    ("/", "show_all_titles", ["GET"], [json_response]),
+    ("", "show_all_titles", ["GET"], [json_response]),
     ("/<string:title_id>", "show_one_title", ["GET"], [json_response]),
-    ("/", "add_title", ["POST"], [jwt_required, json_response]),
+    ("/all", "get_all_titles", ["GET"], [json_response]),
+    ("", "add_title", ["POST"], [jwt_required, json_response]),
     ("/<string:title_id>", "edit_title", ["PUT"], [jwt_required, json_response]),
     ("/<string:title_id>", "delete_title", ["DELETE"], [jwt_required, admin_required, json_response]),
     ("/stats/ratings", "get_rating_stats", ["GET"], [json_response]),

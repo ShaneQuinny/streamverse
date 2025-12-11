@@ -1,0 +1,25 @@
+/* auth-user.css */
+
+.auth-user {
+  color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 20px;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.05));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  white-space: nowrap;
+  font-weight: 400;
+  font-size: 1.2rem;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.auth-user-text {
+  color: rgba(255, 255, 255, 0.85);
+  margin-right: 0.35rem;
+}
+
+.auth-user-name {
+  color: #ffffff;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}

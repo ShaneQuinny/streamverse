@@ -1,0 +1,42 @@
+import {
+  HttpInterceptorFn,
+  HttpErrorResponse,
+} from '@angular/common/http';
+import { catchError } from 'rxjs/operators';
+import { throwError } from 'rxjs';
+
+const API_BASE = 'http://localhost:5000/api/v1.0';
+
+const ACCESS_KEY = 'access_token';
+const EXP_KEY = 'expiration';
+const SESSION_EXPIRED_KEY = 'session_expired';
+
+export const jwtInterceptor: HttpInterceptorFn = (req, next) => {
+  const accessToken = localStorage.getItem(ACCESS_KEY);
+
+  const isApiRequest = req.url.startsWith(API_BASE);
+  const isLoginRequest = req.url.endsWith('/auth/login');
+
+  if (!isApiRequest || isLoginRequest || !accessToken) {
+    return next(req);
+  }
+
+  const authReq = req.clone({
+    setHeaders: {
+      Authorization: `Bearer ${accessToken}`,
+    },
+  });
+
+  return next(authReq).pipe(
+    catchError((error: HttpErrorResponse) => {
+      if (error.status === 401) {
+        // Session no longer valid (likely expired) – keep refresh token
+        localStorage.removeItem(ACCESS_KEY);
+        localStorage.removeItem(EXP_KEY);
+        localStorage.setItem(SESSION_EXPIRED_KEY, '1');
+      }
+
+      return throwError(() => error);
+    })
+  );
+};

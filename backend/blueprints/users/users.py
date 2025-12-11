@@ -73,6 +73,14 @@ def get_all_users():
         
     except Exception as e:
             return {"error": f"Server error: {str(e)}"}, 500
+    
+# --- Get All Users --
+def get_all_users_in_db():
+    data_to_return = []
+    for user in users.find({}, {"password": 0}):
+        user['_id'] = str(user['_id'])
+        data_to_return.append(user)
+    return data_to_return, 200 
 
 # --- Get Single Registered User ---  
 def get_user(username):
@@ -334,7 +342,8 @@ def set_user_active_status(username, active, reason, current_admin):
 
 # --- Route Definitions ---
 users_routes = [
-    ("/", "get_all_users", ["GET"], [jwt_required, admin_required, json_response]),
+    ("", "get_all_users", ["GET"], [jwt_required, admin_required, json_response]),
+    ("/all", "get_all_users_in_db", ["GET"], [jwt_required, admin_required, json_response]),
     ("/<string:username>", "get_user", ["GET"], [jwt_required, admin_required, json_response]),
     ("/<string:username>", "update_user_details", ["PATCH"], [jwt_required, admin_required, json_response]),
     ("/<string:username>/resetpassword", "reset_user_password", ["PUT"], [jwt_required, admin_required, json_response]),

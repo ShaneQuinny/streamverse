@@ -1,5 +1,6 @@
 # --- Imports ---
 from flask import Flask
+from flask_cors import CORS
 from globals import API_VERSION
 from blueprints.audit.audit import audit_bp
 from blueprints.auth.auth import auth_bp
@@ -10,6 +11,7 @@ from blueprints.users.users import users_bp
 
 # Create Flask app instance
 app = Flask(__name__)
+CORS(app)
 
 # Define base API prefix
 API_PREFIX = f"/api/v{API_VERSION}"
