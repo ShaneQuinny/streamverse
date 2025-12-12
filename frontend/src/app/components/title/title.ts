@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, FormArray } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -12,6 +12,10 @@ import { AuthService } from '../../services/auth/auth-service';
 import { CacheService } from '../../services/cache/cache-service';
 import { ExternalService } from '../../services/external/external-service';
 
+/** 
+ * The Title component displays a single title, its reviews, tailored recommendations, 
+ * and provides editing tools for admins, including advanced reactive forms and platform arrays. 
+ * */
 @Component({
   selector: 'app-title',
   imports: [CommonModule, ReactiveFormsModule, RouterModule],
@@ -19,26 +23,64 @@ import { ExternalService } from '../../services/external/external-service';
   templateUrl: './title.html',
   styleUrl: './title.css',
 })
+export class Title {
 
-export class Title implements OnDestroy {
-
+  /** The currently loaded title model. */
   title!: TitleModel;
+
+  /** Observable stream of reviews for this title. */
   reviews$!: Observable<Review[]>;
+
+  /** Reactive form used for creating and editing a review. */
   reviewForm!: FormGroup;
+
+  /** Reactive form used for editing the title details. */
   titleEditForm!: FormGroup;
+
+  /** The currently logged in username */
   currentUsername: string | null = null;
+
+  /** Indicates whether the current user is an admin. */
   isAdmin = false;
+
+  /** Global loading flag for title initialisation. */
   isLoading = false;
+
+  /** Stores any error message related to loading the title. */
   errorMessage = '';
+
+  /** Holds the ID of the review being edited, or null when adding a new review. */
   editingReviewId: string | null = null;
+
+  /** Tailored recommendation results for this title. */
   recommendedTitles: any[] = [];
+
+  /** Indicates whether recommendations are currently loading. */
   recommendationsLoading = false;
+
+  /** Stores errors related to loading recommendations. */
   recommendationsError = '';
+
+  /** Indicates whether the title edit mode is currently active. */
   isEditingTitle = false;
+
+  /** Indicates whether a title save operation is in progress. */
   isSavingTitle = false;
   
+  /** Tracks authentication state subscription for cleanup. */
   private authSubscription?: Subscription;
 
+  /**
+   * @constructor for the Title component. 
+   * 
+   * @param route Used to read the title and review id parameter from the URL.
+   * @param formBuilder FormBuilder for reactive form creation
+   * @param webService Handles HTTP communication with the StreamVerse API.
+   * @param authService Handles authentication actions and exposes the reactive authentication state.
+   * @param cacheService CacheService for caching poster images
+   * @param externalService Handles actions related to third party services.
+   * @param router Angular router for redirecting after operations.
+   */
   constructor(
     private route: ActivatedRoute,
     private formBuilder: FormBuilder,
@@ -49,6 +91,11 @@ export class Title implements OnDestroy {
     private router: Router
   ) {}
   
+  /**
+   * Lifecycle hook that runs once after component initialisation.
+   * Restores pagination state, loads titles and reviews and 
+   * subscribes to authentication state to update UI reactively.
+   */
   ngOnInit(): void {
     const id = this.route.snapshot.paramMap.get('id');
     if (id){
@@ -65,12 +112,25 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Lifecycle hook called when the component is about to be destroyed.
+   * Unsubscribes from auth state to prevent memory leaks.
+   */
   ngOnDestroy(): void {
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
   }
 
+  /**
+   * Loads title details, reviews, and sets up forms and poster cache.
+   * 
+   * Fetches the title by ID, initializes the review form if not already created,
+   * loads poster images from cache or fetches them, and triggers recommendations loading.
+   * 
+   * @param id The title ID to load
+   * @private
+   */
   private loadTitleAndReviews(id: string): void {
     this.isLoading = true;
     this.errorMessage = '';
@@ -89,7 +149,6 @@ export class Title implements OnDestroy {
             },
             error: (err) => {
               console.error(`Error fetching poster:`, err);
-              this.cacheService.set(title._id, '');
             }
           });
         }
@@ -102,7 +161,6 @@ export class Title implements OnDestroy {
           });
         }
 
-        // Initialize title edit form
         this.initializeTitleEditForm();
         
         this.isLoading = false;
@@ -110,12 +168,20 @@ export class Title implements OnDestroy {
       },
       error: (err) => {
         console.error('Error fetching title', err);
-        this.errorMessage = 'Something went wrong loading this title.';
+        this.errorMessage = err?.errors?.err || 'Something went wrong loading this title.';
         this.isLoading = false;
       }
     });
   }
 
+  /**
+   * Initializes the reactive form for editing title details.
+   * 
+   * Builds a FormGroup with controls for all title fields including nested FormArrays
+   * for genres, cast, directors, languages, and streaming platforms.
+   * 
+   * @private
+   */
   private initializeTitleEditForm(): void {
     this.titleEditForm = this.formBuilder.group({
       title: [this.title.title, Validators.required],
@@ -149,34 +215,65 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Getter for the genres FormArray.
+   * @returns The genres FormArray from titleEditForm
+   */
   get genres(): FormArray {
     return this.titleEditForm.get('genres') as FormArray;
   }
 
+  /**
+   * Getter for the available_on FormArray.
+   * @returns The available_on FormArray from titleEditForm
+   */
   get availableOn(): FormArray {
     return this.titleEditForm.get('available_on') as FormArray;
   }
 
+  /**
+   * Getter for the cast FormArray.
+   * @returns The cast FormArray from titleEditForm
+   */
   get cast(): FormArray {
     return this.titleEditForm.get('cast') as FormArray;
   }
 
+  /**
+   * Getter for the directors FormArray.
+   * @returns The directors FormArray from titleEditForm
+   */
   get directors(): FormArray {
     return this.titleEditForm.get('directors') as FormArray;
   }
 
+  /**
+   * Getter for the languages FormArray.
+   * @returns The languages FormArray from titleEditForm
+   */
   get languages(): FormArray {
     return this.titleEditForm.get('languages') as FormArray;
   }
 
+  /**
+   * Adds a new empty genre control to the genres FormArray.
+   */
   addGenre(): void {
     this.genres.push(this.formBuilder.control('', Validators.required));
   }
 
+  /**
+   * Removes a genre from the FormArray at the specified index.
+   * @param index The position of the genre to remove
+   */
   removeGenre(index: number): void {
     this.genres.removeAt(index);
   }
 
+  /**
+   * Adds a new empty platform group to the available_on FormArray.
+   * Creates a FormGroup with platform name and URL controls.
+   */
   addPlatform(): void {
     this.availableOn.push(
       this.formBuilder.group({
@@ -186,49 +283,77 @@ export class Title implements OnDestroy {
     );
   }
 
+  /**
+   * Removes a platform from the FormArray at the specified index.
+   * @param index The position of the platform to remove
+   */
   removePlatform(index: number): void {
     this.availableOn.removeAt(index);
   }
 
+  /**
+   * Adds a new empty cast member control to the cast FormArray.
+   */
   addCast(): void {
     this.cast.push(this.formBuilder.control(''));
   } 
 
+  /**
+   * Removes a cast member from the FormArray at the specified index.
+   * @param index The position of the cast member to remove
+   */
   removeCast(index: number): void {
     this.cast.removeAt(index);
   }
 
+  /**
+   * Adds a new empty director control to the directors FormArray.
+   */
   addDirector(): void {
     this.directors.push(this.formBuilder.control(''));
   }
 
+  /**
+   * Removes a director from the FormArray at the specified index.
+   * @param index The position of the director to remove
+   */
   removeDirector(index: number): void {
     this.directors.removeAt(index);
   }
 
+  /**
+   * Adds a new empty language control to the languages FormArray.
+   */
   addLanguage(): void {
     this.languages.push(this.formBuilder.control(''));
   }
 
+  /**
+   * Removes a language from the FormArray at the specified index.
+   * @param index The position of the language to remove
+   */
   removeLanguage(index: number): void {
     this.languages.removeAt(index);
   }
 
+  /**
+   * Toggles between view and edit mode for the title.
+   * When cancelling edit mode, resets the form to original values.
+   */
   toggleEditMode(): void {
     if (this.isEditingTitle) {
       // Cancel editing - reset form to original values
       this.initializeTitleEditForm();
     }
     this.isEditingTitle = !this.isEditingTitle;
-    
-    if (this.isEditingTitle) {
-      // Scroll to top when entering edit mode
-      setTimeout(() => {
-        document.querySelector('.info-box')?.scrollIntoView({ behavior: 'smooth' });
-      }, 100);
-    }
   }
 
+  /**
+   * Saves the edited title details to the API.
+   * 
+   * Validates the form, sends the update request, and reloads the title data
+   * to reflect the changes. Shows success or error messages accordingly.
+   */
   onSaveTitleEdit(): void {
     if (this.titleEditForm.invalid) {
       this.titleEditForm.markAllAsTouched();
@@ -259,10 +384,24 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Retrieves the cached poster URL for the given title.
+   * @param title The title model to get the poster for
+   * @returns The poster URL from cache, or empty string if not found
+   */
   getPosterUrl(title: TitleModel): string {
     return this.cacheService.get(title._id) || '';
   }
 
+  /**
+   * Loads tailored recommendations for the current title.
+   * 
+   * Fetches personalized title recommendations based on the current title's
+   * attributes and sets appropriate loading or error states.
+   * 
+   * @param titleId The ID of the title to get recommendations for
+   * @private
+   */
   private loadRecommendations(titleId: string): void {
     this.recommendationsLoading = true;
     this.recommendationsError = '';
@@ -275,12 +414,19 @@ export class Title implements OnDestroy {
       },
       error: (err) => {
         console.error('Error loading tailored recommendations', err);
-        this.recommendationsError = 'Could not load tailored recommendations.';
+        this.recommendationsError = err?.errors?.error || 'Could not load tailored recommendations.';
         this.recommendationsLoading = false;
       },
     });
   }
 
+  /**
+   * Navigates to a different title page.
+   * 
+   * Routes to the new title, reloads all content, and scrolls to the top of the page.
+   * 
+   * @param titleId The ID of the title to navigate to
+   */
   navigateToTitle(titleId: string): void {
     if (!titleId) return;
     
@@ -290,11 +436,17 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Handles review submission for both new and edited reviews.
+   * 
+   * If editing an existing review, updates it via PUT request.
+   * Otherwise, creates a new review via POST request.
+   * Resets the form after successful submission.
+   */
   onSubmitReview(): void {
     if (!this.title || this.reviewForm.invalid) return;
 
     const { comment, rating } = this.reviewForm.getRawValue();
-
     if (this.editingReviewId) {
       this.webService.updateReview(this.title._id, this.editingReviewId, comment, rating).subscribe({
         next: () => {
@@ -329,6 +481,13 @@ export class Title implements OnDestroy {
     }
   }
 
+  /**
+   * Enters edit mode for a specific review.
+   * 
+   * Populates the review form with the existing review data and sets the editing ID.
+   * 
+   * @param review The review to edit
+   */
   onEditReview(review: Review): void {
     this.editingReviewId = review._id;
     this.reviewForm.patchValue({
@@ -337,6 +496,14 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Deletes a review after user confirmation.
+   * 
+   * Prompts the user to confirm deletion, then sends a DELETE request
+   * and refreshes the reviews list on success.
+   * 
+   * @param reviewId The ID of the review to delete
+   */
   onDeleteReview(reviewId: string): void {
     if (!confirm('Are you sure you want to delete this review?')) {
       return;
@@ -353,6 +520,12 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Deletes the current title after user confirmation.
+   * 
+   * Prompts for confirmation, sends a DELETE request, and redirects
+   * to the titles list page on success. This action is permanent.
+   */
   onDeleteTitle(): void {
     if (!confirm(`Are you sure you want to delete "${this.title.title}"? This action cannot be undone.`)) {
       return;
@@ -370,6 +543,10 @@ export class Title implements OnDestroy {
     });
   }
 
+  /**
+   * Cancels the current review edit operation.
+   * Clears the editing ID and resets the form to default values.
+   */
   cancelEdit(): void {
     this.editingReviewId = null;
     this.reviewForm.reset({

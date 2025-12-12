@@ -18,7 +18,7 @@ import { CommonModule } from '@angular/common';
 })
 
 /**
- * Authuser component manages the display of the currently authenticated username
+ * Authuser class manages the display of the currently authenticated username
  * within the navigation bar. 
  */
 export class Authuser {

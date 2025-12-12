@@ -138,14 +138,17 @@
 </p>
 
 
-
-
     <p class="comment">
-        <h3>Implements</h3>
+        <h3>Description</h3>
     </p>
     <p class="comment">
-                <code>OnDestroy</code>
+        <p>The Titles component displays a paginated list of titles retrieved from the StreamVerse API.</p>
+<p>It also allows admins to add new titles via a modal form, loads posters through an external API,
+manages pagination state via session storage, and reacts to authentication state changes.</p>
+
     </p>
+
+
 
 
 <section data-compodoc="block-metadata">
@@ -332,7 +335,7 @@
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="33" class="link-to-prism">src/app/components/titles/titles.ts:33</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="59" class="link-to-prism">src/app/components/titles/titles.ts:59</a></div>
                             </td>
                         </tr>
 
@@ -346,6 +349,7 @@
                                                 <td>Name</td>
                                                     <td>Type</td>
                                                 <td>Optional</td>
+                                                    <td>Description</td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -360,6 +364,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Handles HTTP communication with the StreamVerse API.</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>cacheService</td>
@@ -372,6 +380,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>CacheService for caching poster images</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>formBuilder</td>
@@ -384,6 +396,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>FormBuilder for reactive form creation</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>router</td>
@@ -396,6 +412,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Angular router for redirecting after operations.</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>authService</td>
@@ -408,6 +428,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Handles authentication actions and exposes the reactive authentication state.</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>externalService</td>
@@ -420,6 +444,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Handles actions related to third party services.</p>
+
+                                                        </td>
                                                 </tr>
                                         </tbody>
                                     </table>
@@ -461,19 +489,26 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="144"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:144</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="229"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:229</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Initializes the Add Title reactive form with default values and validators.</p>
+<p>Sets up all required fields including title information, cast, directors,
+genres, ratings, and streaming platforms with appropriate validation rules.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
 
                         </div>
+                            <div class="io-description">
+                                
+                            </div>
                 </td>
             </tr>
         </tbody>
@@ -498,14 +533,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="168"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:168</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="263"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:263</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Closes the Add Title modal and resets the form.</p>
+<p>Hides the modal and resets all form fields back to their default values,
+clearing any user input.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -535,14 +574,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="140"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:140</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="217"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:217</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves the cached poster URL for a given title.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -553,6 +594,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -567,6 +609,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>The title object to get the poster for</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -576,7 +622,8 @@
 
                         </div>
                             <div class="io-description">
-                                
+                                <p>The cached poster URL, or empty string if not found</p>
+
                             </div>
                 </td>
             </tr>
@@ -602,14 +649,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="107"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:107</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="167"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:167</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Jumps to the first page of results.</p>
+<p>Only performs navigation if not already on page 1.
+Updates session storage and reloads titles.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -639,14 +690,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="116"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:116</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="181"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:181</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Jumps to the last page of results.</p>
+<p>Only performs navigation if not already on the last page.
+Updates session storage and reloads titles.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -676,14 +731,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="125"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:125</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="195"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:195</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Loads poster images for all titles on the current page.</p>
+<p>Checks the cache before making external API calls to avoid redundant requests.
+Poster URLs are stored in the cache service for quick retrieval.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -713,14 +772,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="75"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:75</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="120"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:120</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Fetches the current page of titles from the API.</p>
+<p>Updates the list of titles and total pages count, then triggers
+poster loading for all titles on the current page.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -750,14 +813,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="98"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:98</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="153"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:153</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Moves to the next page if not already on the last page.</p>
+<p>Increments the page counter, updates session storage, and reloads
+the titles for the new page.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -787,14 +854,17 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="68"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:68</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="108"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:108</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Lifecycle hook called when the component is about to be destroyed.
+Unsubscribes from auth state to prevent memory leaks.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -824,14 +894,19 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="44"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:44</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="87"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:87</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Lifecycle hook that runs once after component initialisation.</p>
+<p>Checks session storage for a saved page number, retrieves the current
+authentication state, subscribes to auth changes for reactive UI updates,
+builds the add title form, and loads the initial page of titles.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -861,14 +936,19 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="193"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:193</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="305"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:305</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Submits the Add Title form to the API.</p>
+<p>Validates the form, transforms comma-separated fields into arrays,
+sends the data to the API, and navigates to the new title&#39;s detail page
+on success. Displays error messages if the operation fails.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -898,14 +978,17 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="163"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:163</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="252"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:252</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Opens the Add Title modal dialog.
+Clears any previous error messages before displaying the modal.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -935,14 +1018,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="89"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:89</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="139"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:139</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Moves to the previous page if not already on the first page.</p>
+<p>Decrements the page counter, updates session storage, and reloads
+the titles for the new page.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -974,14 +1061,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="186"
-                                    class="link-to-prism">src/app/components/titles/titles.ts:186</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="291"
+                                    class="link-to-prism">src/app/components/titles/titles.ts:291</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Converts a comma-separated string into an array of trimmed strings.</p>
+<p>Splits the input by commas, trims whitespace from each element,
+and filters out any empty strings.</p>
+</div>
 
                             <div class="io-description">
                                 <b>Parameters :</b>
@@ -992,6 +1083,7 @@
                                             <td>Name</td>
                                                 <td>Type</td>
                                             <td>Optional</td>
+                                                <td>Description</td>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -1006,6 +1098,10 @@
                                             </td>
 
 
+                                            <td>
+                                                    <p>The comma-separated string to parse</p>
+
+                                            </td>
                                         </tr>
                                     </tbody>
                                 </table>
@@ -1015,7 +1111,8 @@
 
                         </div>
                             <div class="io-description">
-                                
+                                <p>An array of non-empty trimmed strings</p>
+
                             </div>
                 </td>
             </tr>
@@ -1051,10 +1148,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="28" class="link-to-prism">src/app/components/titles/titles.ts:28</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="50" class="link-to-prism">src/app/components/titles/titles.ts:50</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Stores error messages related to adding a title.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1077,10 +1180,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="26" class="link-to-prism">src/app/components/titles/titles.ts:26</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="44" class="link-to-prism">src/app/components/titles/titles.ts:44</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Reactive form for adding a new title.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1105,10 +1214,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="33" class="link-to-prism">src/app/components/titles/titles.ts:33</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="59" class="link-to-prism">src/app/components/titles/titles.ts:59</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Subscription to authentication state changes for cleanup.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1136,10 +1251,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/app/components/titles/titles.ts:29</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="53" class="link-to-prism">src/app/components/titles/titles.ts:53</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>The currently logged in username.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1167,10 +1288,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">src/app/components/titles/titles.ts:30</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="56" class="link-to-prism">src/app/components/titles/titles.ts:56</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Indicates whether the current user has admin privileges.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1198,10 +1325,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="27" class="link-to-prism">src/app/components/titles/titles.ts:27</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="47" class="link-to-prism">src/app/components/titles/titles.ts:47</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Indicates whether a title save operation is in progress.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1229,10 +1362,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="20" class="link-to-prism">src/app/components/titles/titles.ts:20</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="32" class="link-to-prism">src/app/components/titles/titles.ts:32</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Array containing the current page of titles from the API.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1260,10 +1399,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/app/components/titles/titles.ts:22</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="38" class="link-to-prism">src/app/components/titles/titles.ts:38</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Current page number being displayed.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1291,10 +1436,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="25" class="link-to-prism">src/app/components/titles/titles.ts:25</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/app/components/titles/titles.ts:41</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Controls visibility of the Add Title modal dialog.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1317,10 +1468,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="21" class="link-to-prism">src/app/components/titles/titles.ts:21</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="35" class="link-to-prism">src/app/components/titles/titles.ts:35</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Total number of pages available based on current page size.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -1330,7 +1487,7 @@
 
 
     <div class="tab-pane fade  tab-source-code" id="source">
-        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Component, OnDestroy } from &#x27;@angular/core&#x27;;
+        <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
 import { WebService } from &#x27;../../services/web/web-service&#x27;;
 import { CacheService } from &#x27;../../services/cache/cache-service&#x27;;
 import { RouterModule, Router } from &#x27;@angular/router&#x27;;
@@ -1340,6 +1497,12 @@ import { Subscription } from &#x27;rxjs&#x27;;
 import { AuthService } from &#x27;../../services/auth/auth-service&#x27;;
 import { ExternalService } from &#x27;../../services/external/external-service&#x27;;
 
+/**
+ * The Titles component displays a paginated list of titles retrieved from the StreamVerse API.
+ * 
+ * It also allows admins to add new titles via a modal form, loads posters through an external API,
+ * manages pagination state via session storage, and reacts to authentication state changes.
+ */
 @Component({
   selector: &#x27;app-titles&#x27;,
   imports: [RouterModule, CommonModule, ReactiveFormsModule],
@@ -1348,22 +1511,52 @@ import { ExternalService } from &#x27;../../services/external/external-service&#
   styleUrl: &#x27;./titles.css&#x27;,
 })
 
-export class Titles implements OnDestroy {
+/**
+ * Titles class manages the display of the current titles available in Streamverse,
+ * and allows the ability to add titles for registered users. 
+ */
+export class Titles {
+
+  /** Array containing the current page of titles from the API. */
   list_of_titles: any &#x3D; [];
+
+  /** Total number of pages available based on current page size. */
   totalPages: any;
+
+  /** Current page number being displayed. */
   page: number &#x3D; 1;
 
-  //  Add Title modal state
+  /** Controls visibility of the Add Title modal dialog. */
   showAddTitleModal &#x3D; false;
+
+  /** Reactive form for adding a new title. */
   addTitleForm!: FormGroup;
+
+  /** Indicates whether a title save operation is in progress. */
   isSavingTitle &#x3D; false;
+
+  /** Stores error messages related to adding a title. */
   addTitleError &#x3D; &#x27;&#x27;;
+
+  /** The currently logged in username. */
   currentUsername: string | null &#x3D; null;
+
+  /** Indicates whether the current user has admin privileges. */
   isAdmin &#x3D; false;
 
-  // Add subscription to track auth state changes
+  /** Subscription to authentication state changes for cleanup. */
   private authSubscription?: Subscription;
 
+  /**
+   * @constructor for the Titles component.
+   * 
+   * @param webService Handles HTTP communication with the StreamVerse API.
+   * @param cacheService CacheService for caching poster images
+   * @param formBuilder FormBuilder for reactive form creation
+   * @param router Angular router for redirecting after operations.
+   * @param authService Handles authentication actions and exposes the reactive authentication state.
+   * @param externalService Handles actions related to third party services.
+   */
   constructor(
     private webService: WebService,
     private cacheService: CacheService,
@@ -1373,39 +1566,47 @@ export class Titles implements OnDestroy {
     private externalService: ExternalService
   ) {}
 
+  /**
+   * Lifecycle hook that runs once after component initialisation.
+   * 
+   * Checks session storage for a saved page number, retrieves the current
+   * authentication state, subscribes to auth changes for reactive UI updates,
+   * builds the add title form, and loads the initial page of titles.
+   */
   ngOnInit() {
-    // Restore pagination state
     if (sessionStorage[&#x27;page&#x27;]) {
       this.page &#x3D; Number(sessionStorage[&#x27;page&#x27;]);
     }
 
-    // Get the current current logged-in user (if user logged in)
     this.currentUsername &#x3D; this.authService.currentUsername;
     this.isAdmin &#x3D; this.authService.isAdmin ?? false;
 
-    // Subscribe to auth state changes 
     this.authSubscription &#x3D; this.authService.auth$.subscribe((authState) &#x3D;&gt; {
       this.currentUsername &#x3D; authState.username;
       this.isAdmin &#x3D; authState.isAdmin;
     });
 
-    // Build the Add Title modal form
     this.buildAddTitleForm();
-
-    // Load titles list
     this.loadTitles();
   }
 
-
+  /**
+   * Lifecycle hook called when the component is about to be destroyed.
+   * Unsubscribes from auth state to prevent memory leaks.
+   */
   ngOnDestroy(): void {
-    // Clean up subscription 
     if (this.authSubscription) {
       this.authSubscription.unsubscribe();
     }
   }
 
+  /**
+   * Fetches the current page of titles from the API.
+   * 
+   * Updates the list of titles and total pages count, then triggers
+   * poster loading for all titles on the current page.
+   */
   loadTitles() {
-    // Get the titles from the streamverse API
     this.webService.getTitles(this.page).subscribe({
       next: (response: any) &#x3D;&gt; {
         this.list_of_titles &#x3D; response.data.titles;
@@ -1418,8 +1619,13 @@ export class Titles implements OnDestroy {
     });
   }
 
+  /**
+   * Moves to the previous page if not already on the first page.
+   * 
+   * Decrements the page counter, updates session storage, and reloads
+   * the titles for the new page.
+   */
   previousPage() {
-    // Handle page navigation
     if (this.page &gt; 1) {
       this.page &#x3D; this.page - 1;
       sessionStorage[&#x27;page&#x27;] &#x3D; this.page;
@@ -1427,8 +1633,13 @@ export class Titles implements OnDestroy {
     }
   }
 
+  /**
+   * Moves to the next page if not already on the last page.
+   * 
+   * Increments the page counter, updates session storage, and reloads
+   * the titles for the new page.
+   */
   nextPage() {
-    // Handle page navigation
     if (this.page &lt; this.totalPages) {
       this.page &#x3D; this.page + 1;
       sessionStorage[&#x27;page&#x27;] &#x3D; this.page;
@@ -1436,17 +1647,27 @@ export class Titles implements OnDestroy {
     }
   }
 
+  /**
+   * Jumps to the first page of results.
+   * 
+   * Only performs navigation if not already on page 1.
+   * Updates session storage and reloads titles.
+   */
   goToFirstPage() {
-    // Handle page navigation, allowing users to skip to the first page
     if (this.page !&#x3D;&#x3D; 1) {
       this.page &#x3D; 1;
       sessionStorage[&#x27;page&#x27;] &#x3D; this.page;
       this.loadTitles();
     }
   }
-  
+
+  /**
+   * Jumps to the last page of results.
+   * 
+   * Only performs navigation if not already on the last page.
+   * Updates session storage and reloads titles.
+   */
   goToLastPage() {
-    // Handle page navigation, allowing users to skip to the last page
     if (this.page !&#x3D;&#x3D; this.totalPages) {
       this.page &#x3D; this.totalPages;
       sessionStorage[&#x27;page&#x27;] &#x3D; this.page;
@@ -1454,9 +1675,16 @@ export class Titles implements OnDestroy {
     }
   }
 
+  /**
+   * Loads poster images for all titles on the current page.
+   * 
+   * Checks the cache before making external API calls to avoid redundant requests.
+   * Poster URLs are stored in the cache service for quick retrieval.
+   */
   loadPosters(): void {
     this.list_of_titles.forEach((title: any) &#x3D;&gt; {
-      if (this.cacheService.has(title._id)) return;
+      if (this.cacheService.has(title._id)) 
+        return;
 
       this.externalService.getMoviePoster(title.title, title.release_year).subscribe({
         next: (response: any) &#x3D;&gt; {
@@ -1469,10 +1697,24 @@ export class Titles implements OnDestroy {
     });
   }
 
+  /**
+   * Retrieves the cached poster URL for a given title.
+   * 
+   * @param title The title object to get the poster for
+   * @returns The cached poster URL, or empty string if not found
+   */
   getPosterUrl(title: any): string {
     return this.cacheService.get(title._id) || &#x27;&#x27;;
   }
 
+  /**
+   * Initializes the Add Title reactive form with default values and validators.
+   * 
+   * Sets up all required fields including title information, cast, directors,
+   * genres, ratings, and streaming platforms with appropriate validation rules.
+   * 
+   * @private
+   */
   private buildAddTitleForm(): void {
     const currentYear &#x3D; new Date().getFullYear();
 
@@ -1492,11 +1734,21 @@ export class Titles implements OnDestroy {
     });
   }
 
+  /**
+   * Opens the Add Title modal dialog.
+   * Clears any previous error messages before displaying the modal.
+   */
   openAddTitleModal(): void {
     this.addTitleError &#x3D; &#x27;&#x27;;
     this.showAddTitleModal &#x3D; true;
   }
 
+  /**
+   * Closes the Add Title modal and resets the form.
+   * 
+   * Hides the modal and resets all form fields back to their default values,
+   * clearing any user input.
+   */
   closeAddTitleModal(): void {
     this.showAddTitleModal &#x3D; false;
     this.addTitleForm.reset({
@@ -1515,6 +1767,16 @@ export class Titles implements OnDestroy {
     });
   }
 
+  /**
+   * Converts a comma-separated string into an array of trimmed strings.
+   * 
+   * Splits the input by commas, trims whitespace from each element,
+   * and filters out any empty strings.
+   * 
+   * @param input The comma-separated string to parse
+   * @returns An array of non-empty trimmed strings
+   * @private
+   */
   private toStringArray(input: string): string[] {
     return input
       .split(&#x27;,&#x27;)
@@ -1522,6 +1784,13 @@ export class Titles implements OnDestroy {
       .filter((s) &#x3D;&gt; !!s);
   }
 
+  /**
+   * Submits the Add Title form to the API.
+   * 
+   * Validates the form, transforms comma-separated fields into arrays,
+   * sends the data to the API, and navigates to the new title&#x27;s detail page
+   * on success. Displays error messages if the operation fails.
+   */
   onSubmitAddTitle(): void {
     if (this.addTitleForm.invalid) {
       this.addTitleForm.markAllAsTouched();
@@ -1533,7 +1802,7 @@ export class Titles implements OnDestroy {
 
     const raw &#x3D; this.addTitleForm.value;
 
-    const payload &#x3D; {
+    const updatedTitleData &#x3D; {
       type: raw.type,
       title: raw.title,
       description: raw.description,
@@ -1548,29 +1817,23 @@ export class Titles implements OnDestroy {
       rotten_tomatoes_score: Number(raw.rotten_tomatoes_score),
     };
 
-    this.webService.postTitle(payload).subscribe({
-      next: (res: any) &#x3D;&gt; {
+    this.webService.postTitle(updatedTitleData).subscribe({
+      next: (response: any) &#x3D;&gt; {
         this.isSavingTitle &#x3D; false;
         this.showAddTitleModal &#x3D; false;
 
-        // APIResponse → data.id from backend add_title()
-        const newId &#x3D; res?.data?.id ?? res?.id;
+        const newId &#x3D; response?.data?._id;
 
         if (newId) {
-          // Redirect to new title detail page
           this.router.navigate([&#x27;/titles&#x27;, newId]);
         } else {
-          // Fallback: reload list if ID missing
           this.loadTitles();
         }
       },
       error: (err) &#x3D;&gt; {
         console.error(&#x27;Error adding title&#x27;, err);
         this.isSavingTitle &#x3D; false;
-        this.addTitleError &#x3D;
-          err?.error?.errors?.error ||
-          err?.error?.error ||
-          &#x27;Failed to add title. Please try again.&#x27;;
+        this.addTitleError &#x3D; err?.errors?.error || &#x27;Failed to add title. Please try again.&#x27;;
       },
     });
   }

@@ -142,6 +142,21 @@
 </p>
 
 
+    <p class="comment">
+        <h3>Description</h3>
+    </p>
+    <p class="comment">
+        <p>The User component provides a full admin interface for viewing
+and editing the details of StreamVerse users.</p>
+<p>Admins can do the following:</p>
+<ul>
+<li>Update profile information</li>
+<li>Reset the user&#39;s password</li>
+<li>Deactivating and reactivating accounts with reasons</li>
+<li>Permanently deleting a user from the system</li>
+</ul>
+
+    </p>
 
 
 
@@ -173,10 +188,6 @@
                 <td class="col-md-9"><code>app-user</code></td>
             </tr>
 
-            <tr>
-                <td class="col-md-3">standalone</td>
-                <td class="col-md-9"><code>true</code></td>
-            </tr>
 
             <tr>
                 <td class="col-md-3">imports</td>
@@ -297,12 +308,12 @@
             <tbody>
                 <tr>
                     <td class="col-md-4">
-<code>constructor(route: ActivatedRoute, router: Router, fb: FormBuilder, webService: <a href="../injectables/WebService.html" target="_self">WebService</a>)</code>
+<code>constructor(route: ActivatedRoute, router: Router, formBuilder: FormBuilder, webService: <a href="../injectables/WebService.html" target="_self">WebService</a>)</code>
                     </td>
                 </tr>
                         <tr>
                             <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">src/app/components/user/user.ts:30</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="50" class="link-to-prism">src/app/components/user/user.ts:50</a></div>
                             </td>
                         </tr>
 
@@ -316,6 +327,7 @@
                                                 <td>Name</td>
                                                     <td>Type</td>
                                                 <td>Optional</td>
+                                                    <td>Description</td>
                                             </tr>
                                         </thead>
                                         <tbody>
@@ -330,6 +342,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Used to read the &quot;username&quot; parameter from the URL.</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>router</td>
@@ -342,9 +358,13 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Angular router for redirecting after operations.</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
-                                                        <td>fb</td>
+                                                        <td>formBuilder</td>
                                                   
                                                         <td>
                                                                     <code>FormBuilder</code>
@@ -354,6 +374,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>FormBuilder used to construct reactive forms.</p>
+
+                                                        </td>
                                                 </tr>
                                                 <tr>
                                                         <td>webService</td>
@@ -366,6 +390,10 @@
                                                             No
                                                     </td>
                                                     
+                                                        <td>
+                                                                <p>Handles HTTP communication with the StreamVerse API.</p>
+
+                                                        </td>
                                                 </tr>
                                         </tbody>
                                     </table>
@@ -405,14 +433,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="61"
-                                    class="link-to-prism">src/app/components/user/user.ts:61</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="94"
+                                    class="link-to-prism">src/app/components/user/user.ts:94</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Retrieves user details from the API and populates the form..</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -442,14 +472,16 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="39"
-                                    class="link-to-prism">src/app/components/user/user.ts:39</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="70"
+                                    class="link-to-prism">src/app/components/user/user.ts:70</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Lifecycle hook that runs once after component initialisation.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -479,14 +511,17 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="171"
-                                    class="link-to-prism">src/app/components/user/user.ts:171</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="206"
+                                    class="link-to-prism">src/app/components/user/user.ts:206</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Deactivates the user and records a reason if provided.
+Updates the UI state so the user appears inactive.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -516,14 +551,17 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="217"
-                                    class="link-to-prism">src/app/components/user/user.ts:217</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="256"
+                                    class="link-to-prism">src/app/components/user/user.ts:256</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Permanently removes the user from StreamVerse and
+redirects the admin back to the users grid.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -553,14 +591,17 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="194"
-                                    class="link-to-prism">src/app/components/user/user.ts:194</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="231"
+                                    class="link-to-prism">src/app/components/user/user.ts:231</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Reactivates the user and records a reason if provided.
+Updates the UI state so the user appears active.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -590,14 +631,17 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="137"
-                                    class="link-to-prism">src/app/components/user/user.ts:137</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="175"
+                                    class="link-to-prism">src/app/components/user/user.ts:175</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Resets a user&#39;s password using the values from the password form.
+Performs validation before submitting to the API.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -627,14 +671,18 @@
 
                     <tr>
                         <td class="col-md-4">
-                            <div class="io-line">Defined in <a href="" data-line="97"
-                                    class="link-to-prism">src/app/components/user/user.ts:97</a></div>
+                            <div class="io-line">Defined in <a href="" data-line="133"
+                                    class="link-to-prism">src/app/components/user/user.ts:133</a></div>
                         </td>
                     </tr>
 
 
             <tr>
                 <td class="col-md-4">
+                        <div class="io-description"><p>Submits updated user information to the API.
+Also handles username changes by updating both the local variable
+and the current route URL when necessary.</p>
+</div>
 
                         <div class="io-description">
                             <b>Returns : </b>        <code><a href="https://www.typescriptlang.org/docs/handbook/basic-types.html" target="_blank" >void</a></code>
@@ -674,10 +722,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="30" class="link-to-prism">src/app/components/user/user.ts:30</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="50" class="link-to-prism">src/app/components/user/user.ts:50</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Displays error messages for user actions.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -705,10 +759,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="27" class="link-to-prism">src/app/components/user/user.ts:27</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="41" class="link-to-prism">src/app/components/user/user.ts:41</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Global loading flag used across all user actions.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -736,10 +796,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="28" class="link-to-prism">src/app/components/user/user.ts:28</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="44" class="link-to-prism">src/app/components/user/user.ts:44</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Indicates whether a password update request is in progress.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -762,10 +828,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="22" class="link-to-prism">src/app/components/user/user.ts:22</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="32" class="link-to-prism">src/app/components/user/user.ts:32</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Reactive form for resetting a user&#39;s password.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -793,10 +865,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/app/components/user/user.ts:29</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="47" class="link-to-prism">src/app/components/user/user.ts:47</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Displays success messages for user actions.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -824,10 +902,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="25" class="link-to-prism">src/app/components/user/user.ts:25</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="38" class="link-to-prism">src/app/components/user/user.ts:38</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Whether the user is currently active (true), inactive (false), or unknown (null).</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -850,10 +934,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="21" class="link-to-prism">src/app/components/user/user.ts:21</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="29" class="link-to-prism">src/app/components/user/user.ts:29</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>Reactive form for editing main user details.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -876,10 +966,16 @@
                 </tr>
                     <tr>
                         <td class="col-md-4">
-                                <div class="io-line">Defined in <a href="" data-line="24" class="link-to-prism">src/app/components/user/user.ts:24</a></div>
+                                <div class="io-line">Defined in <a href="" data-line="35" class="link-to-prism">src/app/components/user/user.ts:35</a></div>
                         </td>
                     </tr>
 
+            <tr>
+                <td class="col-md-4">
+                    <div class="io-description"><p>The username extracted from the route, representing the user being viewed or edited.</p>
+</div>
+                </td>
+            </tr>
 
         </tbody>
     </table>
@@ -892,46 +988,77 @@
         <pre class="line-numbers compodoc-sourcecode"><code class="language-typescript">import { Component } from &#x27;@angular/core&#x27;;
 import { CommonModule } from &#x27;@angular/common&#x27;;
 import { ActivatedRoute, Router, RouterLink } from &#x27;@angular/router&#x27;;
-import {
-  FormBuilder,
-  FormGroup,
-  ReactiveFormsModule,
-  Validators,
-} from &#x27;@angular/forms&#x27;;
+import { FormBuilder, FormGroup, ReactiveFormsModule, Validators, } from &#x27;@angular/forms&#x27;;
 import { WebService } from &#x27;../../services/web/web-service&#x27;;
 
+/**
+ * The User component provides a full admin interface for viewing
+ * and editing the details of StreamVerse users.
+ *
+ * Admins can do the following:
+ *  - Update profile information
+ *  - Reset the user&#x27;s password
+ *  - Deactivating and reactivating accounts with reasons
+ *  - Permanently deleting a user from the system
+ *
+ */
 @Component({
   selector: &#x27;app-user&#x27;,
-  standalone: true,
   imports: [CommonModule, ReactiveFormsModule, RouterLink],
   templateUrl: &#x27;./user.html&#x27;,
   styleUrls: [&#x27;./user.css&#x27;],
   providers: [WebService],
 })
+
 export class User {
+
+  /** Reactive form for editing main user details. */
   userForm!: FormGroup;
+
+  /** Reactive form for resetting a user&#x27;s password. */
   passwordForm!: FormGroup;
 
-  usernameParam!: string; // original username from the URL
+  /** The username extracted from the route, representing the user being viewed or edited. */
+  usernameParam!: string;
+
+  /** Whether the user is currently active (true), inactive (false), or unknown (null). */
   userActive: boolean | null &#x3D; null;
 
+  /** Global loading flag used across all user actions. */
   isLoading &#x3D; false;
+
+  /** Indicates whether a password update request is in progress. */
   isPasswordUpdating &#x3D; false;
+
+  /** Displays success messages for user actions. */
   successMessage &#x3D; &#x27;&#x27;;
+
+  /** Displays error messages for user actions. */
   errorMessage &#x3D; &#x27;&#x27;;
 
+  /**
+   * @constructor for the User component.
+   *
+   * @param route Used to read the &quot;username&quot; parameter from the URL.
+   * @param router Angular router for redirecting after operations.
+   * @param formBuilder FormBuilder used to construct reactive forms.
+   * @param webService Handles HTTP communication with the StreamVerse API.
+   */
   constructor(
     private route: ActivatedRoute,
     private router: Router,
-    private fb: FormBuilder,
+    private formBuilder: FormBuilder,
     private webService: WebService
   ) {}
 
+  /**
+   * Lifecycle hook that runs once after component initialisation.
+   */
   ngOnInit(): void {
     this.usernameParam &#x3D; this.route.snapshot.paramMap.get(&#x27;username&#x27;) || &#x27;&#x27;;
 
     // Main user details form
-    this.userForm &#x3D; this.fb.group({
+    this.userForm &#x3D; this.formBuilder.group({
       username: [&#x27;&#x27;, [Validators.required]],
       fullname: [&#x27;&#x27;, [Validators.required]],
       email: [&#x27;&#x27;, [Validators.required, Validators.email]],
@@ -940,7 +1067,7 @@ export class User {
     });
 
     // Password reset form
-    this.passwordForm &#x3D; this.fb.group({
+    this.passwordForm &#x3D; this.formBuilder.group({
       new_password: [&#x27;&#x27;, [Validators.required, Validators.minLength(8)]],
       confirm_password: [&#x27;&#x27;, [Validators.required]],
     });
@@ -948,7 +1075,9 @@ export class User {
     this.loadUser();
   }
 
-  // --- Load user from API ---
+  /**
+   * Retrieves user details from the API and populates the form..
+   */
   loadUser(): void {
     if (!this.usernameParam) return;
 
@@ -957,7 +1086,6 @@ export class User {
 
     this.webService.getUser(this.usernameParam).subscribe({
       next: (resp: any) &#x3D;&gt; {
-        // Depending how your json_response wrapper shapes it:
         const user &#x3D; resp?.data?.user ?? resp?.data ?? resp?.user;
 
         if (!user) {
@@ -984,7 +1112,11 @@ export class User {
     });
   }
 
-  // --- Save / update user details ---
+  /**
+   * Submits updated user information to the API.
+   * Also handles username changes by updating both the local variable
+   * and the current route URL when necessary.
+   */
   onSaveUserDetails(): void {
     if (this.userForm.invalid) {
       this.userForm.markAllAsTouched();
@@ -992,15 +1124,15 @@ export class User {
     }
 
     const originalUsername &#x3D; this.usernameParam;
-    const payload &#x3D; { ...this.userForm.value };
+    const updatdedData &#x3D; { ...this.userForm.value };
 
     this.isLoading &#x3D; true;
     this.successMessage &#x3D; &#x27;&#x27;;
     this.errorMessage &#x3D; &#x27;&#x27;;
 
-    this.webService.updateUser(originalUsername, payload).subscribe({
-      next: (result: any) &#x3D;&gt; {
-        const data &#x3D; result?.data ?? result;
+    this.webService.updateUser(originalUsername, updatdedData).subscribe({
+      next: (response: any) &#x3D;&gt; {
+        const data &#x3D; response?.data ?? response;
 
         this.successMessage &#x3D;
           data?.message || &#x27;User updated successfully.&#x27;;
@@ -1008,7 +1140,7 @@ export class User {
         const updatedUsername &#x3D; data?.updated_username;
         if (updatedUsername &amp;&amp; updatedUsername !&#x3D;&#x3D; originalUsername) {
           this.usernameParam &#x3D; updatedUsername;
-          // keep URL in sync with new username
+
           this.router.navigate([&#x27;/admin/users&#x27;, updatedUsername], {
             replaceUrl: true,
           });
@@ -1017,18 +1149,18 @@ export class User {
         this.isLoading &#x3D; false;
       },
       error: (err) &#x3D;&gt; {
-        this.errorMessage &#x3D;
-          err?.error?.errors?.error || err?.error?.message || &#x27;Failed to update user.&#x27;;
+        this.errorMessage &#x3D; err?.errors?.error || &#x27;Failed to update user.&#x27;;
         this.isLoading &#x3D; false;
       },
     });
   }
 
-  // --- Reset password ---
+  /**
+   * Resets a user&#x27;s password using the values from the password form.
+   * Performs validation before submitting to the API.
+   */
   onResetPassword(): void {
-    console.log(&#x27;onResetPassword called&#x27;, this.passwordForm.value);
-
-        if (this.passwordForm.invalid) {
+    if (this.passwordForm.invalid) {
       this.passwordForm.markAllAsTouched();
       return;
     }
@@ -1040,25 +1172,24 @@ export class User {
     this.successMessage &#x3D; &#x27;&#x27;;
     this.errorMessage &#x3D; &#x27;&#x27;;
 
-    this.webService
-      .resetUserPassword(this.usernameParam, newPw, confirmPw)
-      .subscribe({
-        next: (res: any) &#x3D;&gt; {
-          const data &#x3D; res?.data ?? res;
-          this.successMessage &#x3D;
-            data?.message || &#x27;Password reset successfully.&#x27;;
-          this.passwordForm.reset();
-          this.isPasswordUpdating &#x3D; false;
-        },
-        error: (err) &#x3D;&gt; {
-          this.errorMessage &#x3D;
-            err?.error?.errors?.message || &#x27;Failed to reset password.&#x27;;
-          this.isPasswordUpdating &#x3D; false;
-        },
-      });
+    this.webService.resetUserPassword(this.usernameParam, newPw, confirmPw).subscribe({
+      next: (response: any) &#x3D;&gt; {
+        const data &#x3D; response?.data ?? response;
+        this.successMessage &#x3D; data?.message || &#x27;Password reset successfully.&#x27;;
+        this.passwordForm.reset();
+        this.isPasswordUpdating &#x3D; false;
+      },
+      error: (err) &#x3D;&gt; {
+        this.errorMessage &#x3D; err?.errors?.message || &#x27;Failed to reset password.&#x27;;
+        this.isPasswordUpdating &#x3D; false;
+      },
+    });
   }
 
-  // --- Deactivate ---
+  /**
+   * Deactivates the user and records a reason if provided.
+   * Updates the UI state so the user appears inactive.
+   */
   onDeactivate(): void {
     const reason &#x3D; this.userForm.get(&#x27;reason&#x27;)?.value?.trim() || &#x27;Deactivated via admin UI&#x27;;
 
@@ -1067,21 +1198,23 @@ export class User {
     this.errorMessage &#x3D; &#x27;&#x27;;
 
     this.webService.deactivateUser(this.usernameParam, reason).subscribe({
-      next: (res: any) &#x3D;&gt; {
-        const data &#x3D; res?.data ?? res;
+      next: (response: any) &#x3D;&gt; {
+        const data &#x3D; response?.data ?? response;
         this.successMessage &#x3D; data?.message || &#x27;User deactivated.&#x27;;
         this.userActive &#x3D; false;
         this.isLoading &#x3D; false;
       },
       error: (err) &#x3D;&gt; {
-        this.errorMessage &#x3D;
-          err?.error?.errors?.error || err?.error?.message || &#x27;Failed to deactivate user.&#x27;;
+        this.errorMessage &#x3D; err?.errors?.error || &#x27;Failed to deactivate user.&#x27;;
         this.isLoading &#x3D; false;
       },
     });
   }
 
-  // --- Reactivate ---
+  /**
+   * Reactivates the user and records a reason if provided.
+   * Updates the UI state so the user appears active.
+   */
   onReactivate(): void {
     const reason &#x3D; this.userForm.get(&#x27;reason&#x27;)?.value?.trim() || &#x27;Reactivated via admin UI&#x27;;
 
@@ -1090,27 +1223,25 @@ export class User {
     this.errorMessage &#x3D; &#x27;&#x27;;
 
     this.webService.reactivateUser(this.usernameParam, reason).subscribe({
-      next: (res: any) &#x3D;&gt; {
-        const data &#x3D; res?.data ?? res;
+      next: (response: any) &#x3D;&gt; {
+        const data &#x3D; response?.data ?? response;
         this.successMessage &#x3D; data?.message || &#x27;User reactivated.&#x27;;
         this.userActive &#x3D; true;
         this.isLoading &#x3D; false;
       },
       error: (err) &#x3D;&gt; {
-        this.errorMessage &#x3D;
-          err?.error?.errors?.error || err?.error?.message || &#x27;Failed to reactivate user.&#x27;;
+        this.errorMessage &#x3D; err?.errors?.error || &#x27;Failed to reactivate user.&#x27;;
         this.isLoading &#x3D; false;
       },
     });
   }
 
-  // --- Delete ---
+  /**
+   * Permanently removes the user from StreamVerse and
+   * redirects the admin back to the users grid.
+   */
   onDelete(): void {
-    if (
-      !confirm(
-        &#x27;Are you sure you want to permanently delete this user? This cannot be undone.&#x27;
-      )
-    ) {
+    if (!confirm(&#x27;Are you sure you want to permanently delete this user? This cannot be undone.&#x27;)) {
       return;
     }
 
@@ -1121,12 +1252,10 @@ export class User {
     this.webService.deleteUser(this.usernameParam).subscribe({
       next: () &#x3D;&gt; {
         this.isLoading &#x3D; false;
-        // Go back to the users grid
         this.router.navigate([&#x27;/admin/users&#x27;]);
       },
       error: (err) &#x3D;&gt; {
-        this.errorMessage &#x3D;
-          err?.error?.errors?.error || err?.error?.message || &#x27;Failed to delete user.&#x27;;
+        this.errorMessage &#x3D; err?.errors?.error || &#x27;Failed to delete user.&#x27;;
         this.isLoading &#x3D; false;
       },
     });
