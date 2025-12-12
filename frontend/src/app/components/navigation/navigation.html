@@ -1,22 +1,14 @@
 <nav class="navbar navbar-expand-lg navbar-custom">
   <div class="container-fluid">
-
-    <!-- Brand -->
     <a class="navbar-brand d-flex align-items-center gap-2" routerLink="/">
       <i class="fa-solid fa-clapperboard"></i>
       StreamVerse
     </a>
-
-    <!-- Toggler -->
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarTogglerDemo03" 
       aria-controls="navbarTogglerDemo03" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
-
-    <!-- Collapsible menu -->
     <div class="collapse navbar-collapse" id="navbarTogglerDemo03">
-
-      <!-- Left navigation -->
       <ul class="navbar-nav mx-auto mb-2 mb-lg-0">
         <li class="nav-item me-2">
           <a 
@@ -24,38 +16,36 @@
               Home
           </a>
         </li>
-
         <li class="nav-item me-2">
           <a class="nav-link" routerLink="/titles" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             Titles
           </a>
         </li>
-
         <li class="nav-item me-2">
           <a class="nav-link" routerLink="/titles/grid" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             Titles Data Grid
           </a>
         </li>
-
         <li class="nav-item me-2" *ngIf="authService.isAdmin">
           <a class="nav-link" routerLink="/admin/users" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             Users (Admin)
           </a>
         </li>
-
         <li class="nav-item me-2" *ngIf="authService.isAdmin">
           <a class="nav-link" routerLink="/admin/audit" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
             Audit Logs (Admin)
           </a>
         </li>
+        <li class="nav-item me-2">
+          <a class="nav-link" routerLink="/test" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }">
+            Test
+          </a>
+        </li>
       </ul>
-
-      <!-- User components -->
       <div class="d-flex align-items-center gap-3">
         <app-authuser></app-authuser>
         <app-authbutton></app-authbutton>
       </div>
-
     </div>
   </div>
 </nav>

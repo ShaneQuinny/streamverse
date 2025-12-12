@@ -16,17 +16,12 @@
     </div>
 
     <div class="card-body">
-      <!-- Loading -->
       <div *ngIf="isLoading" class="text-muted mb-2">
         Loading audit log…
       </div>
-
-      <!-- Error -->
       <div *ngIf="errorMessage" class="alert alert-danger">
         {{ errorMessage }}
       </div>
-
-      <!-- Details -->
       <ng-container *ngIf="!isLoading && auditLog">
         <dl class="row mb-0">
           <dt class="col-sm-3">Admin</dt>

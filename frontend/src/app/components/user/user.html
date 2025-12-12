@@ -20,8 +20,7 @@
       <div *ngIf="successMessage" class="alert alert-success">
         {{ successMessage }}
       </div>
-      
-      <!-- User details form -->
+
       <form [formGroup]="userForm" (ngSubmit)="onSaveUserDetails()">
         <div class="row g-3">
           <div class="col-md-4">
@@ -64,34 +63,19 @@
       </form>
 
       <hr class="my-4" />
-      <!-- Password reset -->
       <form [formGroup]="passwordForm" (ngSubmit)="onResetPassword()">
         <h6>Reset Password</h6>
         <div class="row g-3">
           <div class="col-md-4">
             <label class="form-label">New password</label>
-            <input
-              type="password"
-              class="form-control"
-              formControlName="new_password"
-            />
+            <input type="password" class="form-control" formControlName="new_password"/>
           </div>
-        
           <div class="col-md-4">
             <label class="form-label">Confirm new password</label>
-            <input
-              type="password"
-              class="form-control"
-              formControlName="confirm_password"
-            />
+            <input type="password" class="form-control" formControlName="confirm_password"/>
           </div>
-        
           <div class="col-md-4 d-flex align-items-end">
-            <button
-              type="submit"
-              class="btn btn-outline-success ms-auto"
-              [disabled]="isPasswordUpdating || passwordForm.invalid"
-            >
+            <button type="submit" class="btn btn-outline-success ms-auto" [disabled]="isPasswordUpdating || passwordForm.invalid" >
               {{ isPasswordUpdating ? 'Updating…' : 'Reset Password' }}
             </button>
           </div>

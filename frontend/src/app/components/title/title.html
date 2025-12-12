@@ -1,30 +1,21 @@
 <div class="title-detail-container">
   <div class="container">
-    
     @if (isLoading) {
       <div class="loading">
         <div class="spinner-border text-light"></div>
         <p class="text-white mt-3">Loading...</p>
       </div>
     }
-
     @if (errorMessage) {
-      <div class="alert alert-danger">
-        <i class="bi bi-exclamation-triangle-fill me-2"></i>
-        {{ errorMessage }}
-      </div>
+      <div class="alert alert-danger"><i class="bi bi-exclamation-triangle-fill me-2"></i>{{ errorMessage }}</div>
     }
-
     @if (title && !isLoading) {
       <div class="row mb-4">
-        <!-- Title Info -->
         <div class="col-lg-8">
           <div class="info-box">
             @if (!isEditingTitle) {
-              <!-- VIEW MODE -->
               <span class="badge bg-primary mb-3">{{ title.type }}</span>
               <h1 class="title">{{ title.title }}</h1>
-              
               <div class="meta mb-3">
                 <span><i class="bi bi-calendar3"></i> {{ title.release_year }}</span>
                 <span>•</span>
@@ -32,63 +23,39 @@
                 <span>•</span>
                 <span class="badge bg-primary">{{ title.rating }}</span>
               </div>
-
-              <!-- Genres -->
               <div class="genres mb-3">
                 @for (genre of title.genres; track genre) {
                   <span class="genre">{{ genre }}</span>
                 }
               </div>
-
               <div class="ratings mb-4">
-                <div>
-                  <strong>IMDb:</strong> {{ title.imdb_rating }}/10
-                </div>
-                <div>
-                  <strong>Rotten Tomatoes:</strong> {{ title.rotten_tomatoes_score }}%
-                </div>
+                <div><strong>IMDb:</strong> {{ title.imdb_rating }}/10</div>
+                <div><strong>Rotten Tomatoes:</strong> {{ title.rotten_tomatoes_score }}%</div>
               </div>
-
-              <!-- Overview -->
               <div class="description mb-3">
                 <h5>Overview</h5>
                 <p>{{ title.description }}</p>
               </div>
-
-              <!-- Cast (below overview, same style) -->
               @if (title.cast?.length) {
                 <div class="description mb-3">
                   <h5>Cast</h5>
-                  <p>
-                    {{ title.cast.join(', ') }}
-                  </p>
+                  <p>{{ title.cast.join(', ') }}</p>
                 </div>
               }
-
-              <!-- Directors (below cast) -->
               @if (title.directors?.length) {
                 <div class="description mb-3">
                   <h5>Directors</h5>
-                  <p>
-                    {{ title.directors.join(', ') }}
-                  </p>
+                  <p>{{ title.directors.join(', ') }}</p>
                 </div>
               }
-
-              <!-- Languages (below directors) -->
               @if (title.languages?.length) {
                 <div class="description mb-3">
                   <h5>Languages</h5>
-                  <p>
-                    {{ title.languages.join(', ') }}
-                  </p>
+                  <p>{{ title.languages.join(', ') }}</p>
                 </div>
               }
-
             } @else {
-              <!-- EDIT MODE -->
               <form [formGroup]="titleEditForm">
-                
                 <div class="mb-3">
                   <label class="form-label text-white">Type</label>
                   <select class="form-control" formControlName="type">
@@ -96,7 +63,6 @@
                     <option value="TV Show">TV Show</option>
                   </select>
                 </div>
-
                 <div class="mb-3">
                   <label class="form-label text-white">Title</label>
                   <input type="text" class="form-control" formControlName="title">
@@ -104,8 +70,6 @@
                     <small class="text-danger">Title is required</small>
                   }
                 </div>
-
-                <!-- NEW: CAST -->
                 <div class="mb-3">
                   <label class="form-label text-white">Cast</label>
                   <div formArrayName="cast">
@@ -116,12 +80,8 @@
                       </div>
                     }
                   </div>
-                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addCast()">
-                    <i class="bi bi-plus-circle"></i> Add Cast Member
-                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addCast()"><i class="bi bi-plus-circle"></i> Add Cast Member</button>
                 </div>
-
-                <!-- NEW: DIRECTORS -->
                 <div class="mb-3">
                   <label class="form-label text-white">Directors</label>
                   <div formArrayName="directors">
@@ -132,12 +92,8 @@
                       </div>
                     }
                   </div>
-                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addDirector()">
-                    <i class="bi bi-plus-circle"></i> Add Director
-                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addDirector()"><i class="bi bi-plus-circle"></i> Add Director</button>
                 </div>
-
-                <!-- NEW: LANGUAGES -->
                 <div class="mb-3">
                   <label class="form-label text-white">Languages</label>
                   <div formArrayName="languages">
@@ -148,11 +104,8 @@
                       </div>
                     }
                   </div>
-                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addLanguage()">
-                    <i class="bi bi-plus-circle"></i> Add Language
-                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addLanguage()"><i class="bi bi-plus-circle"></i> Add Language</button>
                 </div>
-
                 <div class="row">
                   <div class="col-md-4 mb-3">
                     <label class="form-label text-white">Release Year</label>
@@ -179,8 +132,6 @@
                     </select>
                   </div>
                 </div>
-
-                <!-- Genres -->
                 <div class="mb-3">
                   <label class="form-label text-white">Genres</label>
                   <div formArrayName="genres">
@@ -191,11 +142,8 @@
                       </div>
                     }
                   </div>
-                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addGenre()">
-                    <i class="bi bi-plus-circle"></i> Add Genre
-                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addGenre()"><i class="bi bi-plus-circle"></i> Add Genre</button>
                 </div>
-
                 <div class="row">
                   <div class="col-md-6 mb-3">
                     <label class="form-label text-white">IMDb Rating</label>
@@ -206,13 +154,10 @@
                     <input type="number" class="form-control" formControlName="rotten_tomatoes_score" min="0" max="100">
                   </div>
                 </div>
-
                 <div class="mb-3">
                   <label class="form-label text-white">Description</label>
                   <textarea class="form-control" formControlName="description" rows="4"></textarea>
                 </div>
-
-                <!-- Platforms -->
                 <div class="mb-3">
                   <label class="form-label text-white">Available On</label>
                   <div formArrayName="available_on">
@@ -220,30 +165,19 @@
                       <div [formGroupName]="$index" class="d-flex gap-2 mb-2">
                         <input type="text" class="form-control" formControlName="platform" placeholder="Platform name">
                         <input type="url" class="form-control" formControlName="url" placeholder="URL">
-                        <button type="button" class="btn btn-danger btn-sm" (click)="removePlatform($index)">
-                          Delete
-                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" (click)="removePlatform($index)">Delete</button>
                       </div>
                     }
                   </div>
-                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addPlatform()">
-                    <i class="bi bi-plus-circle"></i> Add Platform
-                  </button>
+                  <button type="button" class="btn btn-outline-light btn-sm mt-2" (click)="addPlatform()"><i class="bi bi-plus-circle"></i> Add Platform</button>
                 </div>
-
               </form>
             }
           </div>
         </div>
-
-        <!-- Poster & Platforms -->
         <div class="col-lg-4">
           <div class="poster mb-4">
-            <div
-              class="poster-img"
-              [style.background]="getPosterUrl(title)
-                ? 'url(' + getPosterUrl(title) + ') center/cover'
-                : 'linear-gradient(135deg, #0093E9 0%, #80D0C7 100%)'">
+            <div class="poster-img" [style.background]="getPosterUrl(title) ? 'url(' + getPosterUrl(title) + ') center/cover' : 'linear-gradient(135deg, #0093E9 0%, #80D0C7 100%)'">
               @if (!getPosterUrl(title)) {
                 <div class="no-poster">
                   <i class="bi" [class]="title.type === 'Movie' ? 'bi-film' : 'bi-tv'"></i>
@@ -252,56 +186,35 @@
               }
             </div>
           </div>
-
           @if (!isEditingTitle) {
             <div class="platforms-box">
               <h5><i class="bi bi-play-btn-fill"></i> Where to Watch</h5>
               @for (platform of title.available_on; track platform.platform) {
-                <a [href]="platform.url" target="_blank" class="platform">
-                  <i class="bi bi-play-circle-fill"></i>
-                  <span>{{ platform.platform }}</span>
-                  <i class="bi bi-arrow-up-right-circle"></i>
-                </a>
+                <a [href]="platform.url" target="_blank" class="platform"><i class="bi bi-play-circle-fill"></i><span>{{ platform.platform }}</span><i class="bi bi-arrow-up-right-circle"></i></a>
               }
               @if (title.available_on.length === 0) {
-                <div class="no-data">
-                  <i class="bi bi-exclamation-circle"></i>
-                  <span>Coming soon</span>
-                </div>
+                <div class="no-data"><i class="bi bi-exclamation-circle"></i><span>Coming soon</span></div>
               }
             </div>
           }
         </div>
       </div>
-
-      <!-- Edit/Save Controls -->
       @if (currentUsername) {
         <div class="edit-controls mb-4">
           @if (!isEditingTitle) {
-            <button (click)="toggleEditMode()" class="btn btn-warning">
-              <i class="bi bi-pencil-square"></i> Edit Title
-            </button>
+            <button (click)="toggleEditMode()" class="btn btn-warning"><i class="bi bi-pencil-square"></i> Edit Title</button>
           } @else {
-            <button (click)="onSaveTitleEdit()" class="btn btn-success" [disabled]="titleEditForm.invalid || isSavingTitle">
-              <i class="bi bi-check-circle"></i> {{ isSavingTitle ? 'Saving...' : 'Save Changes' }}
-            </button>
-            <button (click)="toggleEditMode()" class="btn btn-secondary" [disabled]="isSavingTitle">
-              <i class="bi bi-x-circle"></i> Cancel
-            </button>
+            <button (click)="onSaveTitleEdit()" class="btn btn-success" [disabled]="titleEditForm.invalid || isSavingTitle"><i class="bi bi-check-circle"></i> {{ isSavingTitle ? 'Saving...' : 'Save Changes' }}</button>
+            <button (click)="toggleEditMode()" class="btn btn-secondary" [disabled]="isSavingTitle"><i class="bi bi-x-circle"></i> Cancel</button>
           }
           @if (isAdmin && !isEditingTitle) {
-            <button (click)="onDeleteTitle()" class="btn btn-danger">
-              <i class="bi bi-trash"></i> Delete Title
-            </button>
+            <button (click)="onDeleteTitle()" class="btn btn-danger"><i class="bi bi-trash"></i> Delete Title</button>
           }
         </div>
       }
-
-      <!-- Recommendations -->
       @if (!isEditingTitle) {
         <div class="section mb-4">
           <h3><i class="bi bi-stars"></i> Recommendations based on "{{ title.title }}"</h3>
-          
           @if (recommendationsLoading) {
             <p class="text-white-50">Loading recommendations...</p>
           }
@@ -333,44 +246,22 @@
           }
         </div>
       }
-
-      <!-- Reviews -->
       @if (!isEditingTitle) {
         <div class="section">
           <h3><i class="bi bi-chat-square-text"></i> User Reviews</h3>
-        
-          <!-- WRITE / EDIT REVIEW FORM -->
           @if (currentUsername) {
             <div class="review-form mb-5">
               <h5>{{ editingReviewId ? 'Edit Review' : 'Write a Review' }}</h5>
-            
               <form [formGroup]="reviewForm" (ngSubmit)="onSubmitReview()">
                 <div class="mb-3">
                   <label>Username</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    formControlName="username"
-                    readonly
-                  />
+                  <input type="text" class="form-control" formControlName="username" readonly />
                 </div>
-
-                <!-- STAR RATING INPUT USING IMAGES -->
                 <div class="mb-4">
                   <label class="mb-3">Rate this title</label>
                   <div>
                     @for (n of [1,2,3,4,5]; track n) {
-                      <span
-                        (click)="reviewForm.get('rating')?.setValue(n)"
-                        style="cursor: pointer; display: inline-block; margin-right: 4px;"
-                      >
-                        <img
-                          src="images/star.png"
-                          alt="Star"
-                          style="width: 24px; height: 24px;"
-                          [style.opacity]="n <= (reviewForm.get('rating')?.value || 0) ? 1 : 0.25"
-                        />
-                      </span>
+                      <span (click)="reviewForm.get('rating')?.setValue(n)" style="cursor: pointer; display: inline-block; margin-right: 4px;"><img src="images/star.png" alt="Star" style="width: 24px; height: 24px;" [style.opacity]="n <= (reviewForm.get('rating')?.value || 0) ? 1 : 0.25" /></span>
                     }
                   </div>
                   <div class="rating-display mt-1">
@@ -378,112 +269,55 @@
                     <span> out of 5 stars</span>
                   </div>
                 </div>
-              
                 <div class="mb-3">
                   <label>Comment</label>
-                  <textarea
-                    class="form-control"
-                    formControlName="comment"
-                    rows="4"
-                    placeholder="Share your thoughts..."
-                  ></textarea>
+                  <textarea class="form-control" formControlName="comment" rows="4" placeholder="Share your thoughts..."></textarea>
                   @if (reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched) {
                     <small class="text-danger">Comment is required</small>
                   }
                 </div>
-              
                 <div class="d-flex gap-2">
-                  <button
-                    type="submit"
-                    class="btn btn-primary"
-                    [disabled]="reviewForm.invalid"
-                  >
-                    <i class="bi bi-send"></i>
-                    {{ editingReviewId ? 'Update' : 'Submit' }}
-                  </button>
-                
+                  <button type="submit" class="btn btn-primary" [disabled]="reviewForm.invalid"><i class="bi bi-send"></i> {{ editingReviewId ? 'Update' : 'Submit' }}</button>
                   @if (editingReviewId) {
-                    <button
-                      type="button"
-                      class="btn btn-secondary"
-                      (click)="cancelEdit()"
-                    >
-                      <i class="bi bi-x-circle"></i> Cancel
-                    </button>
+                    <button type="button" class="btn btn-secondary" (click)="cancelEdit()"><i class="bi bi-x-circle"></i> Cancel</button>
                   }
                 </div>
               </form>
             </div>
           }
           @else {
-            <div class="alert alert-info">
-              <i class="bi bi-info-circle me-2"></i>
-              Please log in to write a review.
-            </div>
+            <div class="alert alert-info"><i class="bi bi-info-circle me-2"></i>Please log in to write a review.</div>
           }
-        
-          <!-- EXISTING REVIEWS AS CARDS -->
           <div class="row mt-4">
             <div class="col-sm-12">
               @if (reviews$ | async; as reviews) {
-              
                 @if (reviews.length > 0) {
                   @for (review of reviews; track review._id) {
                     <div class="card bg-dark text-white mb-3 border-secondary">
-                    
-                      <!-- Header: username + actions -->
                       <div class="card-header d-flex justify-content-between align-items-center">
-                        <div>
-                          <i class="bi bi-person-circle me-2"></i>
-                          {{ review.username }}
-                        </div>
-                      
+                        <div><i class="bi bi-person-circle me-2"></i>{{ review.username }}</div>
                         @if (currentUsername === review.username || isAdmin) {
                           <div class="d-flex gap-2">
                             @if (currentUsername === review.username) {
-                              <button
-                                class="btn btn-sm btn-outline-warning"
-                                (click)="onEditReview(review)"
-                              >
-                                <i class="bi bi-pencil"></i>
-                                Edit
-                              </button>
+                              <button class="btn btn-sm btn-outline-warning" (click)="onEditReview(review)"><i class="bi bi-pencil"></i> Edit</button>
                             }
                             @if (isAdmin) {
-                              <button
-                                class="btn btn-sm btn-outline-danger"
-                                (click)="onDeleteReview(review._id)"
-                              >
-                                <i class="bi bi-trash"></i>
-                                Delete
-                              </button>
+                              <button class="btn btn-sm btn-outline-danger" (click)="onDeleteReview(review._id)"><i class="bi bi-trash"></i> Delete</button>
                             }
                           </div>
                         }
                       </div>
-                    
-                      <!-- Body: comment -->
                       <div class="card-body">
                         <p class="card-text mb-0">{{ review.comment }}</p>
                       </div>
-                    
-                      <!-- Footer: stars + numeric rating -->
                       <div class="card-footer d-flex align-items-center gap-2">
                         <div>
                           @for (n of [1,2,3,4,5]; track n) {
-                            <img
-                              src="images/star.png"
-                              alt="Star"
-                              style="width: 18px; height: 18px; margin-right: 2px;"
-                              [style.opacity]="n <= (review.rating || 0) ? 1 : 0.25"
-                            />
+                            <img src="images/star.png" alt="Star" style="width: 18px; height: 18px; margin-right: 2px;" [style.opacity]="n <= (review.rating || 0) ? 1 : 0.25" />
                           }
                         </div>
-                        <span class="text-muted">
-                          {{ review.rating || 0 }}/5
-                        </span>
+                        <span class="text-muted">{{ review.rating || 0 }}/5</span>
                       </div>
-                    
                     </div>
                   }
                 }
@@ -493,16 +327,13 @@
                     <p>No reviews yet. Be the first!</p>
                   </div>
                 }
-              
               }
             </div>
           </div>
         </div>
       }
       <div class="mt-4">
-        <a routerLink="/titles" class="btn btn-outline-light">
-          <i class="bi bi-arrow-left"></i> Back to Titles
-        </a>
+        <a routerLink="/titles" class="btn btn-outline-light"><i class="bi bi-arrow-left"></i> Back to Titles</a>
       </div>
     }
   </div>

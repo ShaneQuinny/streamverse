@@ -1,19 +1,17 @@
 <div class="home-page-wrapper">
-  <!-- HERO SECTION -->
   <section class="home-hero">
     <div class="home-hero-overlay"></div>
     <div class="container home-hero-content">
       <div>
         <h1 class="display-4 fw-bold mb-3">StreamVerse</h1>
         <p class="lead mb-4">
-          Discover, explore and review your favourite films and TV shows - all in one place.
+          Discover, explore and review your favourite films and TV shows.
         </p>
       </div>
     </div>
   </section>
 
   <div class="container home-main">
-    <!-- WELCOME / AUTH PANEL -->
     <section class="mb-4">
       <div class="card home-panel-card">
         <div
@@ -41,7 +39,6 @@
       </div>
     </section>
 
-    <!-- STATS CARDS -->
     <section class="mb-4">
       <div class="row g-3">
         <div class="col-md-4">
@@ -116,10 +113,8 @@
       </div>
     </section>
 
-    <!-- TOP GENRES + TOP REVIEWED -->
     <section class="mb-5">
       <div class="row g-4">
-        <!-- Top genres -->
         <div class="col-lg-6">
           <div class="card home-panel-card h-100">
             <div class="card-body">
@@ -142,7 +137,6 @@
                     {{ genre._id }} ({{ genre.count }})
                 </span>
               </div>
-
               <div
                 *ngIf="!isLoadingGenres && topGenres.length === 0 && !genresError" class="text-muted small">
                   No genre statistics available yet.
@@ -153,8 +147,7 @@
             </div>
           </div>
         </div>
-
-        <!-- Top reviewed titles -->
+        
         <div class="col-lg-6">
           <div class="card home-panel-card h-100">
             <div class="card-body">
@@ -170,30 +163,21 @@
               </div>
               <ul
                 *ngIf="!isLoadingTopReviewed && topReviewedTitles.length > 0" class="list-group list-group-flush home-list-group">
-                <li
-                  *ngFor="let t of topReviewedTitles"
-                  class="list-group-item d-flex justify-content-between align-items-center home-title-item"
+                <li *ngFor="let t of topReviewedTitles" class="list-group-item d-flex justify-content-between align-items-center home-title-item"
                   [routerLink]="['/titles', t._id]">
-                  <span class="home-title-name">{{ t.title }}</span>
+                  <span class="home-title-name">
+                    {{ t.title }}
+                  </span>
                   <span class="badge bg-primary rounded-pill">
-                    {{ t.review_count }} review{{
-                      t.review_count === 1 ? '' : 's'
-                    }}
+                    {{ t.review_count }} review{{ t.review_count === 1 ? '' : 's' }}
                   </span>
                 </li>
               </ul>
-
               <div
-                *ngIf="
-                  !isLoadingTopReviewed &&
-                  topReviewedTitles.length === 0 &&
-                  !topReviewedError
-                "
-                class="text-muted small"
-              >
+                *ngIf="!isLoadingTopReviewed && topReviewedTitles.length === 0 && !topReviewedError"
+                class="text-muted small">
                 No reviews have been recorded yet.
               </div>
-
               <div *ngIf="topReviewedError" class="text-danger small">
                 {{ topReviewedError }}
               </div>

@@ -7,6 +7,7 @@ import { Users } from './components/users/users';
 import { User } from './components/user/user';
 import { Audit } from './components/audit/audit';
 import { AuditRecord } from './components/auditrecord/auditrecord';
+import { ServiceTests } from './components/services-tests/services-tests';
 
 /**
  * Defines the full routing for the StreamVerse FE.
@@ -59,4 +60,8 @@ export const routes: Routes = [
     path: 'admin/audit/:id',
     component: AuditRecord,
   },
+  {
+    path: 'test',
+    component: ServiceTests
+  }
 ];

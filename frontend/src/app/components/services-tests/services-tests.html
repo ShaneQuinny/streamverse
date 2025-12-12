@@ -1,0 +1,17 @@
+<div style="margin-top: 70px; padding: 20px;">
+  <h1>StreamVerse Services Test Report</h1>
+  
+  <ul style="list-style-type: none; padding: 0;">
+    @for (report of test_output; track report) {
+      <li [style.color]="report.includes('PASS') ? 'green' : 'red'" 
+          style="padding: 8px; margin: 4px 0; border-left: 4px solid; padding-left: 12px;"
+          [style.border-left-color]="report.includes('PASS') ? 'green' : 'red'">
+        {{ report }}
+      </li>
+    }
+  </ul>
+  
+  @if (test_output.length === 0) {
+    <p style="color: #666; font-style: italic;">Tests are running... Please wait.</p>
+  }
+</div>

@@ -1,87 +1,28 @@
-<!-- MAIN AUTH BUTTON -->
-<button class="btn btn-yellow" (click)="onPrimaryClick()">
-  {{ isLoggedIn ? 'Log out' : 'Log in' }}
-</button>
+<button class="btn btn-yellow" (click)="onPrimaryClick()">{{ isLoggedIn ? 'Log out' : 'Log in' }}</button>
 
-<!-- LOGIN MODAL -->
-<div
-  class="modal fade"
-  [class.show]="showLoginModal"
-  [style.display]="showLoginModal ? 'block' : 'none'"
-  id="loginModal"
-  tabindex="-1"
-  aria-labelledby="loginModalLabel"
-  aria-hidden="true"
->
+<div class="modal fade" [class.show]="showLoginModal" [style.display]="showLoginModal ? 'block' : 'none'" id="loginModal" tabindex="-1" aria-labelledby="loginModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white" style="border-radius: 1rem;">
       <div class="modal-header border-0">
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          (click)="closeLoginModal()"
-          aria-label="Close">
-        </button>
+        <button type="button" class="btn-close btn-close-white" (click)="closeLoginModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body p-5 pt-0">
         <div class="text-center">
           <h2 class="fw-bold mb-2 text-uppercase">Login</h2>
-          <p class="text-white-50 mb-4">
-            Please enter your username and password.
-          </p>
-
-          <!-- Login error -->
-          <div *ngIf="loginError" class="alert alert-danger py-2">
-            {{ loginError }}
-          </div>
-
-          <!-- Login success -->
-          <div *ngIf="loginSuccess" class="alert alert-success py-2">
-            {{ loginSuccess }}
-          </div>
-
-          <!-- Username -->
+          <p class="text-white-50 mb-4">Please enter your username and password.</p>
+          <div *ngIf="loginError" class="alert alert-danger py-2">{{ loginError }}</div>
+          <div *ngIf="loginSuccess" class="alert alert-success py-2">{{ loginSuccess }}</div>
           <div class="form-outline form-white mb-4">
-            <input
-              type="text"
-              id="usernameInput"
-              class="form-control form-control-lg"
-              [(ngModel)]="loginUsername"
-              name="loginUsername"
-              autocomplete="username"/>
+            <input type="text" id="usernameInput" class="form-control form-control-lg" [(ngModel)]="loginUsername" name="loginUsername" autocomplete="username"/>
             <label class="form-label" for="usernameInput">Username</label>
           </div>
-
-          <!-- Password -->
           <div class="form-outline form-white mb-4">
-            <input
-              type="password"
-              id="passwordInput"
-              class="form-control form-control-lg"
-              [(ngModel)]="loginPassword"
-              name="loginPassword"
-              autocomplete="current-password"/>
+            <input type="password" id="passwordInput" class="form-control form-control-lg" [(ngModel)]="loginPassword" name="loginPassword" autocomplete="current-password"/>
             <label class="form-label" for="passwordInput">Password</label>
           </div>
-
-          <button
-            class="btn btn-outline-light btn-lg px-5"
-            type="button"
-            (click)="onLogin()"
-            [disabled]="loginSubmitting">
-              {{ loginSubmitting ? 'Logging in…' : 'Login' }}
-          </button>
-
+          <button class="btn btn-outline-light btn-lg px-5" type="button" (click)="onLogin()" [disabled]="loginSubmitting">{{ loginSubmitting ? 'Logging in…' : 'Login' }}</button>
           <div class="mt-4">
-            <p class="mb-0">
-              Don't have an account?
-              <a
-                href="javascript:void(0)"
-                class="text-white-50 fw-bold"
-                (click)="openRegisterModal()">
-                  Register Here
-              </a>
-            </p>
+            <p class="mb-0">Don't have an account? <a href="javascript:void(0)" class="text-white-50 fw-bold" (click)="openRegisterModal()">Register Here</a></p>
           </div>
         </div>
       </div>
@@ -89,154 +30,57 @@
   </div>
 </div>
 
-<!-- LOGOUT CONFIRMATION MODAL -->
-<div
-  class="modal fade"
-  [class.show]="showLogoutModal"
-  [style.display]="showLogoutModal ? 'block' : 'none'"
-  tabindex="-1"
-  aria-labelledby="logoutConfirmLabel"
-  aria-hidden="true"
->
+<div class="modal fade" [class.show]="showLogoutModal" [style.display]="showLogoutModal ? 'block' : 'none'" tabindex="-1" aria-labelledby="logoutConfirmLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white" style="border-radius: 1rem;">
       <div class="modal-header border-0">
         <h5 class="modal-title" id="logoutConfirmLabel">Confirm Logout</h5>
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          (click)="closeLogoutModal()"
-          aria-label="Close"
-        ></button>
+        <button type="button" class="btn-close btn-close-white" (click)="closeLogoutModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <p class="mb-0">
-          Are you sure you want to log out?
-        </p>
+        <p class="mb-0">Are you sure you want to log out?</p>
       </div>
       <div class="modal-footer border-0">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          (click)="closeLogoutModal()"
-        >
-          Cancel
-        </button>
-        <button
-          type="button"
-          class="btn btn-outline-light"
-          (click)="confirmLogout()"
-        >
-          Log out
-        </button>
+        <button type="button" class="btn btn-secondary" (click)="closeLogoutModal()">Cancel</button>
+        <button type="button" class="btn btn-outline-light" (click)="confirmLogout()">Log out</button>
       </div>
     </div>
   </div>
 </div>
 
-<!-- REGISTER MODAL -->
-<div
-  class="modal fade"
-  [class.show]="showRegisterModal"
-  [style.display]="showRegisterModal ? 'block' : 'none'"
-  id="registerModal"
-  tabindex="-1"
-  aria-labelledby="registerModalLabel"
-  aria-hidden="true">
+<div class="modal fade" [class.show]="showRegisterModal" [style.display]="showRegisterModal ? 'block' : 'none'" id="registerModal" tabindex="-1" aria-labelledby="registerModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content bg-dark text-white" style="border-radius: 1rem;">
       <div class="modal-header border-0">
-        <button
-          type="button"
-          class="btn-close btn-close-white"
-          (click)="closeRegisterModal()"
-          aria-label="Close">
-        </button>
+        <button type="button" class="btn-close btn-close-white" (click)="closeRegisterModal()" aria-label="Close"></button>
       </div>
       <div class="modal-body p-5 pt-0">
         <div class="text-center">
           <h2 class="fw-bold mb-2 text-uppercase">Register</h2>
-          <p class="text-white-50 mb-4">
-            Create a StreamVerse account to contribrute to the amazing universe of Movies and TV Shows!
-          </p>
-
-          <!-- Register error -->
-          <div *ngIf="regError" class="alert alert-danger py-2">
-            {{ regError }}
-          </div>
-
-          <!-- Register success -->
-          <div *ngIf="regSuccess" class="alert alert-success py-2">
-            {{ regSuccess }}
-          </div>
-
-          <!-- Full name -->
+          <p class="text-white-50 mb-4">Create a StreamVerse account to contribrute to the amazing universe of Movies and TV Shows!</p>
+          <div *ngIf="regError" class="alert alert-danger py-2">{{ regError }}</div>
+          <div *ngIf="regSuccess" class="alert alert-success py-2">{{ regSuccess }}</div>
           <div class="form-outline form-white mb-3">
-            <input
-              type="text"
-              id="regFullname"
-              class="form-control form-control-lg"
-              [(ngModel)]="regFullname"
-              name="regFullname"/>
+            <input type="text" id="regFullname" class="form-control form-control-lg" [(ngModel)]="regFullname" name="regFullname"/>
             <label class="form-label" for="regFullname">Full name</label>
           </div>
-
-          <!-- Username -->
           <div class="form-outline form-white mb-3">
-            <input
-              type="text"
-              id="regUsername"
-              class="form-control form-control-lg"
-              [(ngModel)]="regUsername"
-              name="regUsername"
-              autocomplete="username"/>
+            <input type="text" id="regUsername" class="form-control form-control-lg" [(ngModel)]="regUsername" name="regUsername" autocomplete="username"/>
             <label class="form-label" for="regUsername">Username</label>
           </div>
-
-          <!-- Email -->
           <div class="form-outline form-white mb-3">
-            <input
-              type="email"
-              id="regEmail"
-              class="form-control form-control-lg"
-              [(ngModel)]="regEmail"
-              name="regEmail"
-              autocomplete="email"/>
+            <input type="email" id="regEmail" class="form-control form-control-lg" [(ngModel)]="regEmail" name="regEmail" autocomplete="email"/>
             <label class="form-label" for="regEmail">Email</label>
           </div>
-
-          <!-- Password -->
           <div class="form-outline form-white mb-3">
-            <input
-              type="password"
-              id="regPassword"
-              class="form-control form-control-lg"
-              [(ngModel)]="regPassword"
-              name="regPassword"
-              autocomplete="new-password"/>
+            <input type="password" id="regPassword" class="form-control form-control-lg" [(ngModel)]="regPassword" name="regPassword" autocomplete="new-password"/>
             <label class="form-label" for="regPassword">Password</label>
           </div>
-
-          <!-- Confirm Password -->
           <div class="form-outline form-white mb-4">
-            <input
-              type="password"
-              id="regConfirmPassword"
-              class="form-control form-control-lg"
-              [(ngModel)]="regConfirmPassword"
-              name="regConfirmPassword"/>
-            <label class="form-label" for="regConfirmPassword">
-              Confirm Password
-            </label>
+            <input type="password" id="regConfirmPassword" class="form-control form-control-lg" [(ngModel)]="regConfirmPassword" name="regConfirmPassword"/>
+            <label class="form-label" for="regConfirmPassword">Confirm Password</label>
           </div>
-
-          <button
-            class="btn btn-outline-light btn-lg px-5"
-            type="button"
-            (click)="onRegister()"
-            [disabled]="regSubmitting">
-              {{ regSubmitting ? 'Creating account…' : 'Register' }}
-          </button>
+          <button class="btn btn-outline-light btn-lg px-5" type="button" (click)="onRegister()" [disabled]="regSubmitting">{{ regSubmitting ? 'Creating account…' : 'Register' }}</button>
         </div>
       </div>
     </div>
