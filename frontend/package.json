@@ -24,7 +24,7 @@
   },
   "private": true,
   "dependencies": {
-    "@angular/common": "^20.3.0",
+    "@angular/common": "^20.3.14",
     "@angular/compiler": "^20.3.0",
     "@angular/core": "^20.3.0",
     "@angular/forms": "^20.3.0",
@@ -37,7 +37,7 @@
     "@omnedia/ngx-starry-sky": "^3.0.3",
     "ag-grid-angular": "^34.3.1",
     "bootstrap": "^5.3.8",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "jquery": "^3.7.1",
     "jwt-decode": "^4.0.0",
     "rxjs": "~7.8.0",
